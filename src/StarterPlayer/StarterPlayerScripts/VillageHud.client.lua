@@ -23,9 +23,7 @@ local function card(size, pos, bg)
 	f.BackgroundTransparency = 0.12
 	f.BorderSizePixel = 0
 	f.Parent = gui
-	local c = Instance.new("UICorner")
-	c.CornerRadius = UDim.new(0, 14)
-	c.Parent = f
+	Instance.new("UICorner", f).CornerRadius = UDim.new(0, 14)
 	local s = Instance.new("UIStroke")
 	s.Color = Color3.fromRGB(200, 160, 80)
 	s.Thickness = 1
@@ -43,7 +41,7 @@ title.Font = Enum.Font.GothamBold
 title.TextSize = 18
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.TextColor3 = Color3.fromRGB(232, 196, 96)
-title.Text = "TEST 1  ·  VILLAGE-05"
+title.Text = "TEST 1  ·  VILLAGE-06"
 title.Parent = top
 
 local phase = Instance.new("TextLabel")
@@ -157,7 +155,7 @@ if remotes then
 	if state then
 		state.OnClientEvent:Connect(function(s)
 			if type(s) ~= "table" then return end
-			title.Text = "TEST 1  ·  " .. tostring(s.build or "VILLAGE-05")
+			title.Text = "TEST 1  ·  " .. tostring(s.build or "VILLAGE-06")
 			phase.Text = s.night and "NIGHT" or "DAY"
 			phase.TextColor3 = s.night and Color3.fromRGB(160, 140, 255) or Color3.fromRGB(120, 220, 140)
 			taskLab.Text = tostring(s.objective or "")

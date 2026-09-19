@@ -1,8 +1,7 @@
 --!nocheck
--- VILLAGE-05 loop: gather/cook/bank/steal/rebirth + night horror lighting.
+-- VILLAGE-06 gameplay on Test 1 terrain.
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
-local TweenService = game:GetService("TweenService")
 
 local Shared = game:GetService("ReplicatedStorage"):WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
@@ -37,18 +36,10 @@ local function checklist(p)
 end
 
 local function objective(p)
-	if p.coins >= Config.BankGoal then
-		return "Reach the Chapel — press P to rebirth"
-	end
-	if p.carry > 0 then
-		return "Bank the meal at YOUR base (Q)"
-	end
-	if p.herbs > 0 and p.wood > 0 then
-		return "Cook at the Inn kitchen (F)"
-	end
-	if p.herbs <= 0 then
-		return "Gather herbs at Willow / Reed (E)"
-	end
+	if p.coins >= Config.BankGoal then return "Chapel altar — press P to rebirth" end
+	if p.carry > 0 then return "Bank the meal at YOUR base (Q)" end
+	if p.herbs > 0 and p.wood > 0 then return "Cook at the Inn kitchen (F)" end
+	if p.herbs <= 0 then return "Gather herbs at Willow / Reed (E)" end
 	return "Chop wood at Ash / Smithy (E)"
 end
 
@@ -69,25 +60,19 @@ local function push(plr, note)
 		checklist = checklist(p),
 		progress = math.clamp(p.coins / math.max(Config.BankGoal, 1), 0, 1),
 	})
-	if note then
-		Remotes.Notify:FireClient(plr, note)
-	end
+	if note then Remotes.Notify:FireClient(plr, note) end
 end
 
 local function near(plr, inst, range)
 	local hrp = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
-	if not (hrp and inst and inst:IsA("BasePart")) then
-		return false
-	end
+	if not (hrp and inst and inst:IsA("BasePart")) then return false end
 	return (hrp.Position - inst.Position).Magnitude <= (range or 16)
 end
 
 local function findBaseModel(inst)
 	local cur = inst
 	while cur and cur ~= workspace do
-		if cur:IsA("Model") and string.sub(cur.Name, 1, 4) == "Base" then
-			return cur
-		end
+		if cur:IsA("Model") and string.sub(cur.Name, 1, 4) == "Base" then return cur end
 		cur = cur.Parent
 	end
 	return nil
@@ -96,25 +81,20 @@ end
 local function signRefresh(bank, name)
 	local bill = bank:FindFirstChild("Sign")
 	local t = bill and bill:FindFirstChildOfClass("TextLabel")
-	if t then
-		t.Text = string.upper(name) .. " BASE  ·  Q bank / R steal"
-	end
+	if t then t.Text = string.upper(name) .. " BASE  ·  Q bank / R steal" end
 end
 
 local function syncStock(plr)
 	local m = baseByUser[plr.UserId]
 	local p = ensure(plr)
-	if m and m:FindFirstChild("Stock") then
-		m.Stock.Value = p.stock
-	end
+	if m and m:FindFirstChild("Stock") then m.Stock.Value = p.stock end
 end
 
 local function clearCarry(plr)
 	local char = plr.Character
-	if char then
-		local old = char:FindFirstChild("CarriedMeal")
-		if old then old:Destroy() end
-	end
+	if not char then return end
+	local old = char:FindFirstChild("CarriedMeal")
+	if old then old:Destroy() end
 end
 
 local function setCarry(plr, on)
@@ -169,29 +149,29 @@ local function teleportToBase(plr)
 	if not (m and hrp) then return end
 	local spawn = m:FindFirstChild("SpawnPad")
 	if spawn then
-		-- stand clearly above the pad
-		hrp.CFrame = spawn.CFrame + Vector3.new(0, 5, 0)
+		hrp.AssemblyLinearVelocity = Vector3.zero
+		hrp.CFrame = spawn.CFrame + Vector3.new(0, 4, 0)
 	end
 end
 
 local function applyDayNight(isNight)
 	night = isNight
 	if isNight then
-		Lighting.ClockTime = 0.2
-		Lighting.Brightness = 0.35
-		Lighting.OutdoorAmbient = Color3.fromRGB(25, 28, 48)
-		Lighting.FogColor = Color3.fromRGB(18, 20, 35)
-		Lighting.FogStart = 40
-		Lighting.FogEnd = 220
-		Lighting.Ambient = Color3.fromRGB(40, 35, 55)
+		Lighting.ClockTime = 0.15
+		Lighting.Brightness = 0.4
+		Lighting.OutdoorAmbient = Color3.fromRGB(28, 30, 50)
+		Lighting.Ambient = Color3.fromRGB(45, 40, 60)
+		Lighting.FogColor = Color3.fromRGB(16, 18, 32)
+		Lighting.FogStart = 35
+		Lighting.FogEnd = 200
 	else
-		Lighting.ClockTime = 16.2
-		Lighting.Brightness = 2.4
+		Lighting.ClockTime = 16.3
+		Lighting.Brightness = 2.3
 		Lighting.OutdoorAmbient = Color3.fromRGB(150, 135, 115)
-		Lighting.FogColor = Color3.fromRGB(190, 200, 210)
-		Lighting.FogStart = 200
-		Lighting.FogEnd = 800
 		Lighting.Ambient = Color3.fromRGB(120, 115, 105)
+		Lighting.FogColor = Color3.fromRGB(190, 200, 210)
+		Lighting.FogStart = 250
+		Lighting.FogEnd = 900
 	end
 end
 
@@ -206,7 +186,7 @@ end
 
 local function onWood(plr, pad)
 	local p = ensure(plr)
-	if not near(plr, pad, 16) then push(plr, "Get closer to the woodpile.") return end
+	if not near(plr, pad, 16) then push(plr, "Get closer to the wood.") return end
 	if p.wood >= Config.MaxWood then push(plr, "Wood bundle full.") return end
 	p.wood += 1
 	p.didWood = true
@@ -223,17 +203,17 @@ local function onCook(plr, pad)
 	p.carry += 1
 	p.didCook = true
 	setCarry(plr, true)
-	push(plr, "Meal cooked — take it to YOUR base (Q).")
+	push(plr, "Meal cooked — bank it at YOUR base (Q).")
 end
 
 local function onBank(plr, pad)
 	local p = ensure(plr)
-	if night then push(plr, "Banking is daytime only. Something watches at night...") return end
+	if night then push(plr, "Banking is daytime only.") return end
 	if not near(plr, pad, 14) then push(plr, "Stand at your base counter.") return end
 	local base = findBaseModel(pad)
 	local owner = base and base:FindFirstChild("OwnerUserId")
 	if not owner or owner.Value ~= plr.UserId then push(plr, "That is not your base.") return end
-	if p.carry < 1 then push(plr, "Cook a meal first (F at Inn).") return end
+	if p.carry < 1 then push(plr, "Cook a meal first (F).") return end
 	p.carry -= 1
 	clearCarry(plr)
 	local payout = math.floor(Config.MealValue * (1 + 0.25 * p.rebirths))
@@ -259,8 +239,8 @@ local function onSteal(plr, pad)
 		clearCarry(victimPlr)
 		p.carry += 1
 		setCarry(plr, true)
-		push(plr, "Stole their meal in the dark!")
-		push(victimPlr, "Something — " .. plr.DisplayName .. " — stole your meal!")
+		push(plr, "Stole their meal!")
+		if victimPlr then push(victimPlr, plr.DisplayName .. " stole your meal!") end
 		return
 	end
 	if victim and victim.coins >= Config.MealValue then
@@ -268,7 +248,7 @@ local function onSteal(plr, pad)
 		p.carry += 1
 		setCarry(plr, true)
 		push(plr, "Robbed their till!")
-		push(victimPlr, plr.DisplayName .. " robbed your base at night!")
+		if victimPlr then push(victimPlr, plr.DisplayName .. " robbed your base!") end
 		return
 	end
 	push(plr, "Nothing to steal.")
@@ -291,7 +271,7 @@ local function onRebirth(plr, pad)
 	p.didBank = false
 	clearCarry(plr)
 	syncStock(plr)
-	push(plr, "The bell accepts you. Rebirth " .. p.rebirths .. ".")
+	push(plr, "Rebirth " .. p.rebirths .. " — the bell remembers you.")
 	teleportToBase(plr)
 end
 
@@ -310,12 +290,12 @@ end
 Players.PlayerAdded:Connect(function(plr)
 	ensure(plr)
 	plr.CharacterAdded:Connect(function()
-		task.wait(0.5)
+		task.wait(0.6)
 		assignBase(plr)
 		teleportToBase(plr)
 		local p = ensure(plr)
 		setCarry(plr, p.carry > 0)
-		push(plr, "Your house is on the plateau. Don't wander the mist alone.")
+		push(plr, "Your base is on the village grounds. Follow the tasks.")
 	end)
 	task.defer(function()
 		assignBase(plr)
@@ -353,9 +333,7 @@ Remotes.Act.OnServerEvent:Connect(function(plr, kind)
 				local pad = d.Parent
 				if pad and pad:IsA("BasePart") then
 					local dist = (hrp.Position - pad.Position).Magnitude
-					if dist < bestDist then
-						best, bestDist, bestName = pad, dist, d.Name
-					end
+					if dist < bestDist then best, bestDist, bestName = pad, dist, d.Name end
 				end
 			end
 		end
@@ -398,35 +376,27 @@ task.spawn(function()
 			applyDayNight(not night)
 			phaseEnds = os.clock() + (night and Config.NightSeconds or Config.DaySeconds)
 			for _, plr in ipairs(Players:GetPlayers()) do
-				if night then
-					push(plr, "Night falls. The watchers wake. Steal is open (R).")
-				else
-					push(plr, "Dawn. Bank your meals (Q).")
-				end
+				push(plr, night and "Night falls. Steal is open (R)." or "Dawn. Bank meals (Q).")
 			end
 		else
-			for _, plr in ipairs(Players:GetPlayers()) do
-				push(plr)
-			end
+			for _, plr in ipairs(Players:GetPlayers()) do push(plr) end
 		end
 	end
 end)
 
 task.spawn(function()
-	local root = workspace:WaitForChild("VillageBuild", 40)
+	local root = workspace:WaitForChild("VillageBuild", 45)
 	if not root then
-		warn("[Village] VillageBuild missing")
+		warn("[Village] VillageBuild missing — is VillageKeep running?")
 		return
 	end
 	local function hook(inst)
 		if inst:IsA("ProximityPrompt") then
-			inst.Triggered:Connect(function(plr)
-				handlePrompt(plr, inst)
-			end)
+			inst.Triggered:Connect(function(plr) handlePrompt(plr, inst) end)
 		end
 	end
 	for _, d in ipairs(root:GetDescendants()) do hook(d) end
 	root.DescendantAdded:Connect(hook)
 end)
 
-print("[Village] VILLAGE-05 Game ready")
+print("[Village] VILLAGE-06 Game ready")
