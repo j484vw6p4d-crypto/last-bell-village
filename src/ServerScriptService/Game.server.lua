@@ -1,5 +1,5 @@
 --!nocheck
--- VILLAGE-08 gameplay on Test 1 terrain.
+-- VILLAGE-09 gameplay on Test 1 terrain.
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
 
@@ -399,4 +399,4 @@ task.spawn(function()
 	root.DescendantAdded:Connect(hook)
 end)
 
-print("[Village] VILLAGE-08 Game ready")
+print("[Village] VILLAGE-09 Game ready")
