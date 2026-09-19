@@ -1,5 +1,5 @@
 --!nocheck
--- VILLAGE-17: one enterable country shed with porch. No harvest/steal/bases.
+-- VILLAGE-18: one enterable country shed with porch. No harvest/steal/bases.
 local World = {}
 
 local function part(name, size, cf, color, parent, mat, collide)
@@ -75,34 +75,100 @@ local function groundY(x, z, ignore)
 end
 
 local function clearJunk()
-	local n = 0
+	-- Nuclear wipe of place junk (keeps Terrain, Camera, characters, VillageBuild).
+	local destroyed = 0
+	local function kill(inst)
+		if inst and inst.Parent then
+			inst:Destroy()
+			destroyed += 1
+		end
+	end
+
 	for _, child in ipairs(workspace:GetChildren()) do
-		if child:IsA("Terrain") or child:IsA("Camera") then
+		if child:IsA("Terrain") or child.Name == "Terrain" then
+			-- keep map
+		elseif child:IsA("Camera") then
 			-- keep
 		elseif child.Name == "VillageBuild" then
-			child:Destroy()
-			n += 1
+			kill(child)
 		elseif child:IsA("Model") and child:FindFirstChildOfClass("Humanoid") then
 			-- keep players
-		elseif child:IsA("BasePart") or child:IsA("Model") or child:IsA("Folder") then
-			-- wipe leftover place props near spawn only (safe radius)
-			local ok, pos = pcall(function()
-				if child:IsA("Model") then
-					return child:GetPivot().Position
-				end
-				return child.Position
-			end)
-			if ok and pos then
-				local flat = Vector3.new(pos.X, 0, pos.Z)
-				if flat.Magnitude < 120 then
-					child:Destroy()
-					n += 1
-				end
+		else
+			kill(child)
+		end
+	end
+
+	-- leftovers (nested parts / models)
+	local leftovers = {}
+	for _, inst in ipairs(workspace:GetDescendants()) do
+		if inst:IsA("Terrain") or inst:IsA("Camera") then
+			-- keep
+		elseif inst:IsA("Model") then
+			if not inst:FindFirstChildOfClass("Humanoid") then
+				table.insert(leftovers, inst)
+			end
+		elseif inst:IsA("BasePart") then
+			local parentModel = inst:FindFirstAncestorOfClass("Model")
+			if not (parentModel and parentModel:FindFirstChildOfClass("Humanoid")) then
+				-- huge flat grey slabs / baseplates / construction
+				local n = string.lower(inst.Name)
+				local hugeFlat = inst.Size.X >= 40 and inst.Size.Z >= 40 and inst.Size.Y <= 10
+				local named = string.find(n, "baseplate", 1, true)
+					or string.find(n, "spawn", 1, true)
+					or n == "part"
+					or n == "ground"
+				table.insert(leftovers, inst)
 			end
 		end
 	end
-	print("[Village] cleared near-spawn junk:", n)
+	table.sort(leftovers, function(a, b)
+		return #(a:GetFullName()) > #(b:GetFullName())
+	end)
+	for _, inst in ipairs(leftovers) do
+		kill(inst)
+	end
+	print("[Village] junk wipe destroyed:", destroyed)
+	return destroyed
 end
+
+-- Cover the old grey yard with grass (no Terrain:Clear — only FillBlock grass).
+local function layGrass(parent, ignore)
+	local Terrain = workspace.Terrain
+	-- paint grass voxels over the old middle yard (FillBlock only — never Terrain:Clear)
+	for x = -80, 80, 16 do
+		for z = -80, 80, 16 do
+			if (x * x + z * z) <= 80 * 80 then
+				local gy = groundY(x, z, ignore)
+				local cf = CFrame.new(x, gy - 2, z)
+				pcall(function()
+					Terrain:FillBlock(cf, Vector3.new(18, 6, 18), Enum.Material.Grass)
+				end)
+			end
+		end
+	end
+	-- grass carpet so the yard reads green even if terrain paint is thin
+	local folder = Instance.new("Folder")
+	folder.Name = "GrassCover"
+	folder.Parent = parent
+	for x = -72, 72, 24 do
+		for z = -72, 72, 24 do
+			if (x * x + z * z) <= 75 * 75 then
+				local gy = groundY(x, z, ignore)
+				local g = part(
+					"GrassPatch",
+					Vector3.new(24, 0.4, 24),
+					CFrame.new(x, gy + 0.15, z),
+					Color3.fromRGB(70, 130, 55),
+					folder,
+					Enum.Material.Grass
+				)
+				g.CanCollide = false
+			end
+		end
+	end
+	print("[Village] grass laid over former junkyard")
+end
+
 
 local function warmLighting()
 	local Lighting = game:GetService("Lighting")
@@ -208,6 +274,9 @@ function World.build()
 	root.Parent = workspace
 	local ignore = { root }
 
+	-- replace grey middle yard with grass
+	layGrass(root, ignore)
+
 	-- place shed near spawn on solid ground
 	local x, z = 0, 0
 	local y = groundY(x, z, ignore)
@@ -231,7 +300,7 @@ function World.build()
 	sl.Material = Enum.Material.Grass
 	sl.Parent = root
 
-	print(string.format("[Village] VILLAGE-17 one shed (y=%.1f) — explore only", y))
+	print(string.format("[Village] VILLAGE-18 one shed (y=%.1f) — explore only", y))
 	return root
 end
 

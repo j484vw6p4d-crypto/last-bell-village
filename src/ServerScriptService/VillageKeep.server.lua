@@ -1,5 +1,5 @@
 --!nocheck
-print("[Village] VILLAGE-17 keep Test 1 terrain — one shed")
+print("[Village] VILLAGE-18 keep Test 1 terrain — one shed")
 local ok, World = pcall(function()
 	return require(script.Parent:WaitForChild("World"))
 end)

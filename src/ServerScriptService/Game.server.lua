@@ -1,5 +1,5 @@
 --!nocheck
--- VILLAGE-17: explore-only. Harvest / steal / tasks disabled.
+-- VILLAGE-18: explore-only. Harvest / steal / tasks disabled.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -47,4 +47,4 @@ Remotes.Act.OnServerEvent:Connect(function(plr)
 	Remotes.Notify:FireClient(plr, "Gameplay systems are paused.")
 end)
 
-print("[Village] VILLAGE-17 explore-only (no harvest/steal)")
+print("[Village] VILLAGE-18 explore-only (no harvest/steal)")
