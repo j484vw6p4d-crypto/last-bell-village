@@ -1,5 +1,5 @@
 --!nocheck
--- VILLAGE-06: builds ON Test 1 terrain (raycast snap). No floating plateau.
+-- VILLAGE-07: builds ON Test 1 terrain (raycast snap). No floating plateau.
 -- Only replaces folder VillageBuild. Never Terrain:Clear / Workspace wipe.
 local World = {}
 
@@ -213,29 +213,93 @@ local function watcher(parent, x, z, ignore)
 	lightOn(torso, Vector3.new(0, 2, -1), Color3.fromRGB(120, 20, 20), 9, 0.55)
 end
 
+
+-- Remove leftover Test 1 construction yard / prototype props near the village center.
+-- Does not touch Terrain, characters, or cameras.
+local function clearConstructionYard()
+	local radius = 48
+	local models = {}
+	local parts = {}
+	for _, inst in ipairs(workspace:GetDescendants()) do
+		if inst:IsA("Model") then
+			if inst:FindFirstChildOfClass("Humanoid") then
+				continue
+			end
+			if inst.Name == "VillageBuild" then
+				continue
+			end
+			local ok, pivot = pcall(function()
+				return inst:GetPivot().Position
+			end)
+			if ok and pivot then
+				local flat = Vector3.new(pivot.X, 0, pivot.Z)
+				if flat.Magnitude <= radius then
+					table.insert(models, inst)
+				end
+			end
+		elseif inst:IsA("BasePart") then
+			if inst.Name == "Terrain" then
+				continue
+			end
+			local parentModel = inst:FindFirstAncestorOfClass("Model")
+			if parentModel and parentModel:FindFirstChildOfClass("Humanoid") then
+				continue
+			end
+			local flat = Vector3.new(inst.Position.X, 0, inst.Position.Z)
+			if flat.Magnitude <= radius and inst.Position.Y < 80 then
+				table.insert(parts, inst)
+			end
+		end
+	end
+	local destroyed = 0
+	for _, m in ipairs(models) do
+		if m.Parent then
+			m:Destroy()
+			destroyed += 1
+		end
+	end
+	for _, part in ipairs(parts) do
+		if part.Parent then
+			part:Destroy()
+			destroyed += 1
+		end
+	end
+	print("[Village] cleared construction yard props:", destroyed)
+end
+
+
 function World.build()
 	local old = workspace:FindFirstChild("VillageBuild")
 	if old then
 		old:Destroy()
 	end
 
+	-- Wipe the grey construction sandbox in the middle of Test 1
+	clearConstructionYard()
+
 	local root = Instance.new("Folder")
 	root.Name = "VillageBuild"
 	root.Parent = workspace
 	local ignore = { root }
 
-	-- Center hub on Test 1 ground (construction middle)
+	-- Center: a real lived-in village house (not a construction pad)
 	local hub, hubY = at(0, 0, ignore)
-	part("HubPad", Vector3.new(36, 0.6, 36), hub * CFrame.new(0, 0.35, 0), Color3.fromRGB(115, 108, 98), root, Enum.Material.Cobblestone)
-	part("MarketCrateA", Vector3.new(3, 3, 3), hub * CFrame.new(-8, 2, 6), Color3.fromRGB(110, 80, 48), root, Enum.Material.WoodPlanks)
-	part("MarketCrateB", Vector3.new(2.6, 2.6, 2.6), hub * CFrame.new(8, 1.9, 6), Color3.fromRGB(96, 70, 40), root, Enum.Material.WoodPlanks)
-	part("MarketBarrel", Vector3.new(3, 3.8, 3), hub * CFrame.new(0, 2.3, 8), Color3.fromRGB(92, 62, 32), root, Enum.Material.Wood)
-	local board = part("NoticeBoard", Vector3.new(10, 8, 0.6), hub * CFrame.new(0, 5, 14), Color3.fromRGB(70, 48, 28), root, Enum.Material.Wood)
+	local centerHome = house(root, "MillerHouse", hub, Color3.fromRGB(168, 140, 110), Color3.fromRGB(95, 55, 40))
+	-- Garden / porch life so the center feels alive
+	part("GardenBedL", Vector3.new(8, 1, 3), hub * CFrame.new(-14, 1.1, 12), Color3.fromRGB(70, 110, 55), root, Enum.Material.Grass)
+	part("GardenBedR", Vector3.new(8, 1, 3), hub * CFrame.new(14, 1.1, 12), Color3.fromRGB(70, 110, 55), root, Enum.Material.Grass)
+	part("FlowerA", Vector3.new(1.2, 1.6, 1.2), hub * CFrame.new(-14, 2.2, 12), Color3.fromRGB(220, 80, 120), root, Enum.Material.SmoothPlastic)
+	part("FlowerB", Vector3.new(1.2, 1.6, 1.2), hub * CFrame.new(14, 2.2, 12), Color3.fromRGB(240, 200, 60), root, Enum.Material.SmoothPlastic)
+	part("WellRing", Vector3.new(6, 2.2, 6), hub * CFrame.new(0, 1.5, 22), Color3.fromRGB(120, 120, 125), root, Enum.Material.Slate)
+	part("WellWater", Vector3.new(4, 0.4, 4), hub * CFrame.new(0, 2.4, 22), Color3.fromRGB(60, 110, 160), root, Enum.Material.Glass)
+	part("Bench", Vector3.new(7, 1.2, 2.2), hub * CFrame.new(12, 1.4, 20), Color3.fromRGB(100, 74, 48), root, Enum.Material.Wood)
+	local board = part("NoticeBoard", Vector3.new(10, 8, 0.6), hub * CFrame.new(-16, 5, 20), Color3.fromRGB(70, 48, 28), root, Enum.Material.Wood)
 	sign(board, "MILLBROOK · cook · bank 80 · survive the night", Vector3.new(0, 6, 0), Color3.fromRGB(255, 220, 140))
-	lantern(root, -14, hubY, -14)
-	lantern(root, 14, hubY, -14)
-	lantern(root, -14, hubY, 14)
-	lantern(root, 14, hubY, 14)
+	sign(board, "MILLER HOUSE · village heart", Vector3.new(0, -5, 0), Color3.fromRGB(200, 230, 255))
+	lantern(root, -18, hubY, -8)
+	lantern(root, 18, hubY, -8)
+	lantern(root, -10, hubY, 26)
+	lantern(root, 10, hubY, 26)
 
 	-- Short roads from hub (on terrain height near center)
 	for _, xz in ipairs({
@@ -319,9 +383,9 @@ function World.build()
 	watcher(root, 0, 95, ignore)
 
 	-- Fallback plaza marker at hub
-	part("Plaza", Vector3.new(8, 0.4, 8), hub * CFrame.new(0, 0.5, 20), Color3.fromRGB(85, 125, 90), root, Enum.Material.Grass)
+	part("FrontPath", Vector3.new(6, 0.35, 14), hub * CFrame.new(0, 0.45, 14), Color3.fromRGB(118, 108, 95), root, Enum.Material.Cobblestone)
 
-	print(string.format("[Village] VILLAGE-06 on Test 1 ground (hubY=%.1f)", hubY))
+	print(string.format("[Village] VILLAGE-07 on Test 1 ground (hubY=%.1f)", hubY))
 	return root
 end
 
