@@ -22,4 +22,5 @@ return {
 	State = ev("State"),
 	Notify = ev("Notify"),
 	Act = ev("Act"),
+	FX = ev("FX"),
 }

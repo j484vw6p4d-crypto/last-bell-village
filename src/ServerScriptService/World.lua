@@ -1,5 +1,5 @@
 --!nocheck
--- VILLAGE-13: futuristic village on Test 1 terrain. Opening doors, real lamp fixtures.
+-- VILLAGE-14: futuristic village on Test 1 terrain. Opening doors, real lamp fixtures.
 -- Never Terrain:Clear. Keeps hills; wipes place junk/Baseplate.
 local World = {}
 
@@ -560,6 +560,95 @@ local function watcher(parent, x, z, ignore)
 	lightOn(torso, Vector3.new(0, 2, -1), Color3.fromRGB(180, 20, 60), 10, 0.7)
 end
 
+
+-- Realistic harvest props (wood pile + leafy herb bed)
+local function makeHerbBed(parent, origin, label)
+	local m = Instance.new("Model")
+	m.Name = "HerbBed"
+	m.Parent = parent
+	local soil = part("Soil", Vector3.new(10, 1.1, 10), origin * CFrame.new(0, 0.55, 0), Color3.fromRGB(62, 42, 26), m, Enum.Material.Ground)
+	m.PrimaryPart = soil
+	part("SoilRim", Vector3.new(10.6, 0.45, 10.6), origin * CFrame.new(0, 0.25, 0), Color3.fromRGB(48, 34, 22), m, Enum.Material.Wood)
+	-- leafy clusters
+	local greens = {
+		Color3.fromRGB(48, 120, 55),
+		Color3.fromRGB(70, 150, 70),
+		Color3.fromRGB(40, 100, 50),
+		Color3.fromRGB(90, 170, 80),
+		Color3.fromRGB(55, 130, 60),
+	}
+	for i = 1, 14 do
+		local ang = (i / 14) * math.pi * 2
+		local r = 1.2 + (i % 4) * 0.85
+		local x = math.cos(ang) * r
+		local z = math.sin(ang) * r * 0.9
+		local h = 1.4 + (i % 3) * 0.55
+		local leaf = part("Leaf" .. i, Vector3.new(1.1, h, 1.1), origin * CFrame.new(x, 1.1 + h * 0.5, z), greens[((i - 1) % #greens) + 1], m, Enum.Material.Grass)
+		leaf.CanCollide = false
+		-- flower tip
+		if i % 3 == 0 then
+			local flower = part("Flower" .. i, Vector3.new(0.55, 0.55, 0.55), origin * CFrame.new(x, 1.1 + h + 0.2, z), Color3.fromRGB(220, 90, 140), m, Enum.Material.SmoothPlastic)
+			flower.CanCollide = false
+		elseif i % 3 == 1 then
+			local bud = part("Bud" .. i, Vector3.new(0.5, 0.5, 0.5), origin * CFrame.new(x, 1.1 + h + 0.15, z), Color3.fromRGB(240, 200, 70), m, Enum.Material.SmoothPlastic)
+			bud.CanCollide = false
+		end
+	end
+	-- center harvest pad (invisible hit for prompt)
+	local pad = part("Herbs", Vector3.new(4, 1, 4), origin * CFrame.new(0, 1.2, 0), Color3.fromRGB(60, 140, 70), m, Enum.Material.Grass)
+	pad.Transparency = 0.35
+	pad.CanCollide = false
+	sign(pad, label or "HERBS · E gather", Vector3.new(0, 5, 0), Color3.fromRGB(160, 255, 180))
+	prompt(pad, "HerbPrompt", "Herb garden", "Gather herbs", Enum.KeyCode.E, 15)
+	return pad, m
+end
+
+local function makeWoodPile(parent, origin, label)
+	local m = Instance.new("Model")
+	m.Name = "WoodPile"
+	m.Parent = parent
+	local ground = part("BarkMat", Vector3.new(11, 0.4, 8), origin * CFrame.new(0, 0.2, 0), Color3.fromRGB(55, 40, 28), m, Enum.Material.Ground)
+	m.PrimaryPart = ground
+	local bark = {
+		Color3.fromRGB(92, 62, 32),
+		Color3.fromRGB(78, 52, 28),
+		Color3.fromRGB(110, 78, 45),
+		Color3.fromRGB(70, 48, 26),
+		Color3.fromRGB(100, 70, 40),
+	}
+	local endGrain = Color3.fromRGB(190, 160, 110)
+	local idx = 0
+	-- stacked log rows
+	for row = 0, 2 do
+		for col = 0, 4 do
+			idx += 1
+			local y = 0.7 + row * 1.15
+			local x = -3.2 + col * 1.55 + (row % 2) * 0.4
+			local z = (row - 1) * 0.15
+			local cf = origin * CFrame.new(x, y, z) * CFrame.Angles(0, 0, math.rad(90))
+			local log = part("Log" .. idx, Vector3.new(4.2, 1.05, 1.05), cf, bark[(idx % #bark) + 1], m, Enum.Material.Wood)
+			-- end caps (sawn face)
+			local capA = part("LogEndA" .. idx, Vector3.new(0.12, 1.0, 1.0), cf * CFrame.new(2.1, 0, 0), endGrain, m, Enum.Material.WoodPlanks)
+			local capB = part("LogEndB" .. idx, Vector3.new(0.12, 1.0, 1.0), cf * CFrame.new(-2.1, 0, 0), endGrain, m, Enum.Material.WoodPlanks)
+			capA.CanCollide = false
+			capB.CanCollide = false
+		end
+	end
+	-- leaning axe block / stump
+	part("Stump", Vector3.new(2.4, 1.6, 2.4), origin * CFrame.new(4.5, 0.9, -2.2), Color3.fromRGB(86, 58, 30), m, Enum.Material.Wood)
+	part("StumpTop", Vector3.new(2.5, 0.2, 2.5), origin * CFrame.new(4.5, 1.75, -2.2), endGrain, m, Enum.Material.WoodPlanks)
+	-- axe resting on stump
+	part("AxeHandle", Vector3.new(0.28, 2.6, 0.28), origin * CFrame.new(4.5, 2.6, -2.2) * CFrame.Angles(0, 0, math.rad(25)), Color3.fromRGB(70, 48, 28), m, Enum.Material.Wood)
+	part("AxeHead", Vector3.new(1.3, 0.8, 0.22), origin * CFrame.new(5.3, 3.5, -2.0) * CFrame.Angles(0, math.rad(20), math.rad(25)), Color3.fromRGB(150, 155, 165), m, Enum.Material.Metal)
+
+	local pad = part("WoodStation", Vector3.new(5, 1.2, 4), origin * CFrame.new(0, 2.2, 0), Color3.fromRGB(92, 62, 32), m, Enum.Material.Wood)
+	pad.Transparency = 0.55
+	pad.CanCollide = false
+	sign(pad, label or "WOOD · E chop", Vector3.new(0, 5, 0), Color3.fromRGB(255, 210, 150))
+	prompt(pad, "WoodPrompt", "Woodpile", "Chop wood", Enum.KeyCode.E, 15)
+	return pad, m
+end
+
 function World.build()
 	local old = workspace:FindFirstChild("VillageBuild")
 	if old then
@@ -619,15 +708,11 @@ function World.build()
 	-- Willow / Ash / Inn / Reed / Smith — spaced so labels don't pile on Miller porch
 	local willowCF = select(1, at(-420, 180, ignore))
 	house(root, "WillowHome", willowCF, Color3.fromRGB(45, 70, 65), Color3.fromRGB(22, 30, 28))
-	local herbs = part("Herbs", Vector3.new(7, 1.4, 7), willowCF * CFrame.new(0, 1.4, -22), Color3.fromRGB(60, 170, 90), root, Enum.Material.Grass)
-	sign(herbs, "WILLOW · E gather herbs", Vector3.new(0, 5, 0), Color3.fromRGB(160, 255, 180))
-	prompt(herbs, "HerbPrompt", "Herb garden", "Gather herbs", Enum.KeyCode.E, 15)
+	local herbs = select(1, makeHerbBed(root, willowCF * CFrame.new(0, 0, -22), "WILLOW · E gather herbs"))
 
 	local ashCF = select(1, at(440, 160, ignore))
 	house(root, "AshCottage", ashCF, Color3.fromRGB(70, 55, 50), Color3.fromRGB(30, 24, 22))
-	local wood = part("WoodStation", Vector3.new(6, 2.2, 5), ashCF * CFrame.new(0, 1.6, -22), Color3.fromRGB(70, 80, 95), root, Enum.Material.Metal)
-	sign(wood, "ASH · E chop wood", Vector3.new(0, 5, 0), Color3.fromRGB(255, 210, 150))
-	prompt(wood, "WoodPrompt", "Woodpile", "Chop wood", Enum.KeyCode.E, 15)
+	local wood = select(1, makeWoodPile(root, ashCF * CFrame.new(0, 0, -22), "ASH · E chop wood"))
 
 	local innCF = select(1, at(40, 420, ignore))
 	local inn = house(root, "LastBellInn", innCF, Color3.fromRGB(55, 50, 70), Color3.fromRGB(24, 22, 32))
@@ -638,18 +723,14 @@ function World.build()
 
 	local reedCF = select(1, at(-400, -320, ignore))
 	house(root, "ReedHouse", reedCF, Color3.fromRGB(50, 65, 55), Color3.fromRGB(22, 28, 24))
-	local reedHerbs = part("ReedHerbs", Vector3.new(6, 1.3, 6), reedCF * CFrame.new(10, 1.3, -20), Color3.fromRGB(50, 140, 70), root, Enum.Material.Grass)
-	sign(reedHerbs, "REED · E extra herbs", Vector3.new(0, 5, 0), Color3.fromRGB(180, 255, 190))
-	prompt(reedHerbs, "HerbPrompt", "River herbs", "Gather herbs", Enum.KeyCode.E, 14)
+	local reedHerbs = select(1, makeHerbBed(root, reedCF * CFrame.new(10, 0, -20), "REED · E extra herbs"))
 
 	local smithCF = select(1, at(420, -300, ignore))
 	house(root, "MillbrookSmithy", smithCF, Color3.fromRGB(60, 55, 50), Color3.fromRGB(28, 26, 24))
 	local coals = part("Coals", Vector3.new(4.5, 0.7, 3), smithCF * CFrame.new(-8, 2.2, -20), Color3.fromRGB(80, 200, 255), root, Enum.Material.Neon)
 	coals.CanCollide = false
 	lightOn(coals, Vector3.new(0, 1, 0), Color3.fromRGB(100, 210, 255), 20, 1.8)
-	local scrap = part("ScrapWood", Vector3.new(5.5, 2, 4.5), smithCF * CFrame.new(10, 1.6, -20), Color3.fromRGB(60, 70, 85), root, Enum.Material.Metal)
-	sign(scrap, "SMITHY · E scrap wood", Vector3.new(0, 5, 0), Color3.fromRGB(200, 230, 255))
-	prompt(scrap, "WoodPrompt", "Scrap wood", "Chop wood", Enum.KeyCode.E, 14)
+	local scrap = select(1, makeWoodPile(root, smithCF * CFrame.new(10, 0, -20), "SMITHY · E scrap wood"))
 
 	local bases = Instance.new("Folder")
 	bases.Name = "Bases"
@@ -664,7 +745,7 @@ function World.build()
 	watcher(root, 220, -500, ignore)
 	watcher(root, 0, 520, ignore)
 
-	print(string.format("[Village] VILLAGE-13 futuristic on Test 1 ground (hubY=%.1f)", hubY))
+	print(string.format("[Village] VILLAGE-14 futuristic on Test 1 ground (hubY=%.1f)", hubY))
 	return root
 end
 

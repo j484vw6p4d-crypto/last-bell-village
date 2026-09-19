@@ -1,5 +1,5 @@
 --!nocheck
--- VILLAGE-13 gameplay on Test 1 terrain.
+-- VILLAGE-14 gameplay on Test 1 terrain.
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
 
@@ -181,6 +181,7 @@ local function onHerbs(plr, pad)
 	if p.herbs >= Config.MaxHerbs then push(plr, "Herb pouch full.") return end
 	p.herbs += 1
 	p.didHerb = true
+	Remotes.FX:FireClient(plr, "gather", pad)
 	push(plr, "Herbs " .. p.herbs .. "/" .. Config.MaxHerbs)
 end
 
@@ -190,6 +191,7 @@ local function onWood(plr, pad)
 	if p.wood >= Config.MaxWood then push(plr, "Wood bundle full.") return end
 	p.wood += 1
 	p.didWood = true
+	Remotes.FX:FireClient(plr, "chop", pad)
 	push(plr, "Wood " .. p.wood .. "/" .. Config.MaxWood)
 end
 
@@ -399,4 +401,4 @@ task.spawn(function()
 	root.DescendantAdded:Connect(hook)
 end)
 
-print("[Village] VILLAGE-13 Game ready")
+print("[Village] VILLAGE-14 Game ready")
