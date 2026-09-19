@@ -4,12 +4,20 @@
     "$className": "DataModel",
     "ReplicatedStorage": {
       "$className": "ReplicatedStorage",
-      "$ignoreUnknownInstances": true
+      "$ignoreUnknownInstances": true,
+      "Shared": {
+        "$className": "Folder",
+        "$ignoreUnknownInstances": true,
+        "Config": { "$path": "src/ReplicatedStorage/Shared/Config.lua" },
+        "Remotes": { "$path": "src/ReplicatedStorage/Shared/Remotes.lua" }
+      }
     },
     "ServerScriptService": {
       "$className": "ServerScriptService",
       "$ignoreUnknownInstances": true,
-      "VillageKeep": { "$path": "src/ServerScriptService/VillageKeep.server.lua" }
+      "VillageKeep": { "$path": "src/ServerScriptService/VillageKeep.server.lua" },
+      "World": { "$path": "src/ServerScriptService/World.lua" },
+      "Game": { "$path": "src/ServerScriptService/Game.server.lua" }
     },
     "StarterPlayer": {
       "$className": "StarterPlayer",
