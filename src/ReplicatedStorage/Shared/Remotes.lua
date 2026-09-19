@@ -1,4 +1,4 @@
---!nocheck
+﻿--!nocheck
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local folder = ReplicatedStorage:FindFirstChild("VillageRemotes")
 if not folder then

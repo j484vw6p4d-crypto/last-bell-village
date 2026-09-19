@@ -1,11 +1,13 @@
---!nocheck
+﻿--!nocheck
 return {
-	BuildId = "MILLBROOK V2",
+	BuildId = "VILLAGE-03",
 	DaySeconds = 90,
 	NightSeconds = 40,
-	StealRange = 14,
+	StealRange = 16,
 	BankGoal = 80,
-	HerbValue = 4,
-	WoodValue = 3,
-	MealValue = 8,
+	MealValue = 10,
+	MaxHerbs = 3,
+	MaxWood = 3,
+	MaxCarry = 1,
+	MaxStall = 4,
 }
