@@ -1,5 +1,5 @@
 --!nocheck
--- VILLAGE-07: builds ON Test 1 terrain (raycast snap). No floating plateau.
+-- VILLAGE-08: builds ON Test 1 terrain (raycast snap). No floating plateau.
 -- Only replaces folder VillageBuild. Never Terrain:Clear / Workspace wipe.
 local World = {}
 
@@ -214,44 +214,64 @@ local function watcher(parent, x, z, ignore)
 end
 
 
--- Remove leftover Test 1 construction yard / prototype props near the village center.
--- Does not touch Terrain, characters, or cameras.
-local function clearConstructionYard()
-	local radius = 48
+-- Wipe leftover Test 1 construction / prototype props across the play area.
+-- Keeps Terrain, characters, cameras. Does not Terrain:Clear.
+local function isCharacterModel(model)
+	return model ~= nil and model:FindFirstChildOfClass("Humanoid") ~= nil
+end
+
+local function underVillageBuild(inst)
+	local cur = inst
+	while cur and cur ~= workspace do
+		if cur.Name == "VillageBuild" then
+			return true
+		end
+		cur = cur.Parent
+	end
+	return false
+end
+
+local function clearJunkDisk(cx, cz, radius)
 	local models = {}
 	local parts = {}
 	for _, inst in ipairs(workspace:GetDescendants()) do
-		if inst:IsA("Model") then
-			if inst:FindFirstChildOfClass("Humanoid") then
-				continue
-			end
-			if inst.Name == "VillageBuild" then
-				continue
-			end
-			local ok, pivot = pcall(function()
-				return inst:GetPivot().Position
-			end)
-			if ok and pivot then
-				local flat = Vector3.new(pivot.X, 0, pivot.Z)
-				if flat.Magnitude <= radius then
-					table.insert(models, inst)
+		if underVillageBuild(inst) then
+			-- never wipe our own rebuild
+		elseif inst:IsA("Terrain") or inst.Name == "Terrain" then
+			-- keep map
+		elseif inst:IsA("Camera") then
+			-- keep
+		elseif inst:IsA("Model") then
+			if isCharacterModel(inst) then
+				-- keep
+			else
+				local ok, pivot = pcall(function()
+					return inst:GetPivot().Position
+				end)
+				if ok and pivot then
+					local flat = Vector3.new(pivot.X - cx, 0, pivot.Z - cz)
+					if flat.Magnitude <= radius then
+						table.insert(models, inst)
+					end
 				end
 			end
 		elseif inst:IsA("BasePart") then
-			if inst.Name == "Terrain" then
-				continue
-			end
 			local parentModel = inst:FindFirstAncestorOfClass("Model")
-			if parentModel and parentModel:FindFirstChildOfClass("Humanoid") then
-				continue
-			end
-			local flat = Vector3.new(inst.Position.X, 0, inst.Position.Z)
-			if flat.Magnitude <= radius and inst.Position.Y < 80 then
-				table.insert(parts, inst)
+			if isCharacterModel(parentModel) then
+				-- keep
+			else
+				local flat = Vector3.new(inst.Position.X - cx, 0, inst.Position.Z - cz)
+				if flat.Magnitude <= radius and inst.Position.Y < 400 then
+					table.insert(parts, inst)
+				end
 			end
 		end
 	end
 	local destroyed = 0
+	-- destroy deepest models first so nested models do not leave orphans
+	table.sort(models, function(a, b)
+		return #(a:GetFullName()) > #(b:GetFullName())
+	end)
 	for _, m in ipairs(models) do
 		if m.Parent then
 			m:Destroy()
@@ -264,7 +284,20 @@ local function clearConstructionYard()
 			destroyed += 1
 		end
 	end
-	print("[Village] cleared construction yard props:", destroyed)
+	return destroyed
+end
+
+local function clearConstructionYard()
+	-- Old clear only hit r=48; the grey yard + base ring sit farther out.
+	local n = clearJunkDisk(0, 0, 130)
+	-- Extra pass on the four base corners (junk lived under Base 1)
+	for _, s in ipairs({
+		{ 105, 55 }, { -105, 55 }, { 105, -55 }, { -105, -55 },
+		{ 75, 75 }, { -75, 75 }, { 75, -75 }, { -75, -75 },
+	}) do
+		n += clearJunkDisk(s[1], s[2], 36)
+	end
+	print("[Village] cleared construction / junk props:", n)
 end
 
 
@@ -367,13 +400,15 @@ function World.build()
 	local bases = Instance.new("Folder")
 	bases.Name = "Bases"
 	bases.Parent = root
+	-- Farther out on the hills so bases are not inside the old yard
 	local spots = {
-		{ 75, 75 },
-		{ -75, 75 },
-		{ 75, -75 },
-		{ -75, -75 },
+		{ 105, 55 },
+		{ -105, 55 },
+		{ 105, -55 },
+		{ -105, -55 },
 	}
 	for i, s in ipairs(spots) do
+		clearJunkDisk(s[1], s[2], 28)
 		buildBase(bases, i, s[1], s[2], ignore)
 	end
 
@@ -385,7 +420,7 @@ function World.build()
 	-- Fallback plaza marker at hub
 	part("FrontPath", Vector3.new(6, 0.35, 14), hub * CFrame.new(0, 0.45, 14), Color3.fromRGB(118, 108, 95), root, Enum.Material.Cobblestone)
 
-	print(string.format("[Village] VILLAGE-07 on Test 1 ground (hubY=%.1f)", hubY))
+	print(string.format("[Village] VILLAGE-08 on Test 1 ground (hubY=%.1f)", hubY))
 	return root
 end
 
