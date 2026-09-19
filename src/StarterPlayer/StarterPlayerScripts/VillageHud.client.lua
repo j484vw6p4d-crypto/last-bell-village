@@ -41,7 +41,7 @@ title.Font = Enum.Font.GothamBold
 title.TextSize = 18
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.TextColor3 = Color3.fromRGB(232, 196, 96)
-title.Text = "TEST 1  ·  VILLAGE-11"
+title.Text = "TEST 1  ·  VILLAGE-12"
 title.Parent = top
 
 local phase = Instance.new("TextLabel")
@@ -155,7 +155,7 @@ if remotes then
 	if state then
 		state.OnClientEvent:Connect(function(s)
 			if type(s) ~= "table" then return end
-			title.Text = "TEST 1  ·  " .. tostring(s.build or "VILLAGE-11")
+			title.Text = "TEST 1  ·  " .. tostring(s.build or "VILLAGE-12")
 			phase.Text = s.night and "NIGHT" or "DAY"
 			phase.TextColor3 = s.night and Color3.fromRGB(160, 140, 255) or Color3.fromRGB(120, 220, 140)
 			taskLab.Text = tostring(s.objective or "")
