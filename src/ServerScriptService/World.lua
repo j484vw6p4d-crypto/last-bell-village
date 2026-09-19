@@ -1,5 +1,5 @@
 --!nocheck
--- VILLAGE-09: builds ON Test 1 terrain (raycast snap). No floating plateau.
+-- VILLAGE-10: builds ON Test 1 terrain (raycast snap). No floating plateau.
 -- Only replaces folder VillageBuild. Never Terrain:Clear / Workspace wipe.
 local World = {}
 
@@ -220,29 +220,34 @@ local function isCharacterModel(model)
 	return model ~= nil and model:FindFirstChildOfClass("Humanoid") ~= nil
 end
 
--- Nuclear wipe: every place prop/model/folder in Workspace except Terrain, Camera, characters.
--- Radius clears missed the yard; user asked to remove EVERY junk part.
+-- Destroy every place prop. Keep Terrain, Camera, characters.
+-- Also specifically kill Baseplate / huge flat grey slabs (the grey area in Test 1).
 local function clearAllPlaceJunk()
 	local destroyed = 0
 
-	-- Pass 1: top-level Workspace children
-	for _, child in ipairs(workspace:GetChildren()) do
-		if child:IsA("Terrain") or child.Name == "Terrain" then
-			-- keep hills / map
-		elseif child:IsA("Camera") then
-			-- keep
-		elseif child.Name == "VillageBuild" then
-			child:Destroy()
-			destroyed += 1
-		elseif child:IsA("Model") and isCharacterModel(child) then
-			-- keep player
-		else
-			child:Destroy()
+	local function kill(inst)
+		if inst and inst.Parent then
+			inst:Destroy()
 			destroyed += 1
 		end
 	end
 
-	-- Pass 2: any leftover BaseParts / Models still hanging under Workspace
+	-- Pass 1: top-level Workspace children
+	for _, child in ipairs(workspace:GetChildren()) do
+		if child:IsA("Terrain") or child.Name == "Terrain" then
+			-- keep hills
+		elseif child:IsA("Camera") then
+			-- keep
+		elseif child.Name == "VillageBuild" then
+			kill(child)
+		elseif child:IsA("Model") and isCharacterModel(child) then
+			-- keep player
+		else
+			kill(child)
+		end
+	end
+
+	-- Pass 2: leftovers + any huge flat slab / Baseplate that survived nesting
 	local leftovers = {}
 	for _, inst in ipairs(workspace:GetDescendants()) do
 		if inst:IsA("Terrain") or inst:IsA("Camera") then
@@ -253,29 +258,75 @@ local function clearAllPlaceJunk()
 			end
 		elseif inst:IsA("BasePart") then
 			local parentModel = inst:FindFirstAncestorOfClass("Model")
-			if not isCharacterModel(parentModel) then
-				table.insert(leftovers, inst)
+			if isCharacterModel(parentModel) then
+				-- keep
+			else
+				local n = string.lower(inst.Name)
+				local hugeFlat = inst.Size.X >= 60 and inst.Size.Z >= 60 and inst.Size.Y <= 8
+				local namedPlate = string.find(n, "baseplate", 1, true)
+					or string.find(n, "spawnlocation", 1, true)
+					or n == "baseplate"
+					or n == "ground"
+					or n == "plate"
+				if hugeFlat or namedPlate then
+					table.insert(leftovers, inst)
+				else
+					table.insert(leftovers, inst)
+				end
 			end
-		elseif inst:IsA("Folder") or inst:IsA("Configuration") or inst:IsA("Attachment") then
-			-- folders of leftover FX / attachments under workspace (not under character)
-			local parentModel = inst:FindFirstAncestorOfClass("Model")
-			if not isCharacterModel(parentModel) and inst.Parent == workspace then
-				table.insert(leftovers, inst)
-			end
+		elseif (inst:IsA("Folder") or inst:IsA("Configuration")) and inst.Parent == workspace then
+			table.insert(leftovers, inst)
 		end
 	end
 	table.sort(leftovers, function(a, b)
 		return #(a:GetFullName()) > #(b:GetFullName())
 	end)
 	for _, inst in ipairs(leftovers) do
-		if inst.Parent then
-			inst:Destroy()
-			destroyed += 1
-		end
+		kill(inst)
 	end
 
 	print("[Village] NUCLEAR junk wipe destroyed:", destroyed)
 	return destroyed
+end
+
+-- Far, separated base spots on the hills (not clustered at the village heart).
+local function pickBaseSpots()
+	local rng = Random.new(20260919)
+	local spots = {}
+	local tries = 0
+	while #spots < 4 and tries < 400 do
+		tries += 1
+		local angle = rng:NextNumber(0, math.pi * 2)
+		local dist = rng:NextNumber(240, 420)
+		local x = math.cos(angle) * dist
+		local z = math.sin(angle) * dist
+		local farFromHub = math.abs(x) >= 120 or math.abs(z) >= 120
+		if not farFromHub then
+			-- too close to village heart
+		else
+			local ok = true
+			for _, s in ipairs(spots) do
+				local dx = s[1] - x
+				local dz = s[2] - z
+				if math.sqrt(dx * dx + dz * dz) < 280 then
+					ok = false
+					break
+				end
+			end
+			if ok then
+				table.insert(spots, { x, z })
+			end
+		end
+	end
+	if #spots < 4 then
+		spots = {
+			{ 320, 80 },
+			{ -300, 140 },
+			{ 260, -280 },
+			{ -240, -300 },
+		}
+	end
+	return spots
 end
 
 
@@ -374,18 +425,13 @@ function World.build()
 	sign(scrap, "SMITHY · E scrap wood", Vector3.new(0, 6, 0), Color3.fromRGB(255, 170, 90))
 	prompt(scrap, "WoodPrompt", "Scrap wood", "Chop wood", Enum.KeyCode.E, 14)
 
-	-- Player bases around the middle construction ring (on real ground)
+	-- Player bases far apart on random hill spots (real ground snap)
 	local bases = Instance.new("Folder")
 	bases.Name = "Bases"
 	bases.Parent = root
-	-- Farther out on the hills so bases are not inside the old yard
-	local spots = {
-		{ 105, 55 },
-		{ -105, 55 },
-		{ 105, -55 },
-		{ -105, -55 },
-	}
+	local spots = pickBaseSpots()
 	for i, s in ipairs(spots) do
+		print(string.format("[Village] Base %d at (%.0f, %.0f)", i, s[1], s[2]))
 		buildBase(bases, i, s[1], s[2], ignore)
 	end
 
@@ -394,10 +440,10 @@ function World.build()
 	watcher(root, 30, -95, ignore)
 	watcher(root, 0, 95, ignore)
 
-	-- Fallback plaza marker at hub
-	part("FrontPath", Vector3.new(6, 0.35, 14), hub * CFrame.new(0, 0.45, 14), Color3.fromRGB(118, 108, 95), root, Enum.Material.Cobblestone)
+	-- Small dirt path only (no big grey pad)
+	part("FrontPath", Vector3.new(4, 0.25, 10), hub * CFrame.new(0, 0.35, 12), Color3.fromRGB(92, 78, 58), root, Enum.Material.Ground)
 
-	print(string.format("[Village] VILLAGE-09 on Test 1 ground (hubY=%.1f)", hubY))
+	print(string.format("[Village] VILLAGE-10 on Test 1 ground (hubY=%.1f)", hubY))
 	return root
 end
 
