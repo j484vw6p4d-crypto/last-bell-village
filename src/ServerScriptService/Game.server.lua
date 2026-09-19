@@ -6,74 +6,111 @@ local Shared = game:GetService("ReplicatedStorage"):WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Remotes = require(Shared:WaitForChild("Remotes"))
 
+local STEPS = {
+	{
+		id = "square",
+		title = "Hear the Mayor",
+		hint = "Go to Millbrook Square and talk to Mayor Alden.",
+		prompt = "SquarePrompt",
+		complete = "The chapel has been silent. Walk the village and gather what the bell needs.",
+	},
+	{
+		id = "inn",
+		title = "Ask at the Inn",
+		hint = "Visit Last Bell Inn and speak with Mira.",
+		prompt = "InnPrompt",
+		complete = "Mira says the spare rope is in Old Bram's loft at Ash Cottage — after you see the smith.",
+	},
+	{
+		id = "reeds",
+		title = "Cut River Reeds",
+		hint = "Pick 5 river reeds around Reed House.",
+		prompt = "ReedPrompt",
+		need = 5,
+		item = "reeds",
+		complete = "You bundled five river reeds for the smith.",
+	},
+	{
+		id = "smithy",
+		title = "Forge the Clapper",
+		hint = "Bring the reeds to Smith Rowan at Millbrook Smithy.",
+		prompt = "SmithyPrompt",
+		needItem = "reeds",
+		needCount = 5,
+		give = "clapper",
+		complete = "Rowan forged the Bell Clapper.",
+	},
+	{
+		id = "willow",
+		title = "Blessing Oil",
+		hint = "Ask Willow at Willow Home for oil.",
+		prompt = "WillowPrompt",
+		give = "oil",
+		complete = "Willow gave you Blessing Oil.",
+	},
+	{
+		id = "ash",
+		title = "The Spare Rope",
+		hint = "Search the loft chest at Ash Cottage.",
+		prompt = "AshPrompt",
+		give = "rope",
+		complete = "You recovered the spare bell rope.",
+	},
+	{
+		id = "chapel",
+		title = "Ring the Last Bell",
+		hint = "Return to the Chapel with clapper, oil, and rope.",
+		prompt = "ChapelPrompt",
+		needAll = { "clapper", "oil", "rope" },
+		ending = true,
+		complete = "The Last Bell rings over Millbrook.",
+	},
+}
+
 local profiles = {}
-local stallOwner = {}
 local night = false
 local phaseEnds = os.clock() + Config.DaySeconds
-
-local TASKS = {
-	"Pick herbs at WILLOW (E)",
-	"Chop wood at ASH (E)",
-	"Cook a meal at the INN (F)",
-	"Bank coins at YOUR stall (Q)",
-	"At night, steal from another stall (R)",
-	"Rebirth at the CHAPEL at 80 coins (P)",
-}
 
 local function ensure(plr)
 	local p = profiles[plr.UserId]
 	if not p then
 		p = {
-			coins = 0,
-			herbs = 0,
-			wood = 0,
-			meals = 0,
-			rebirths = 0,
-			stallId = nil,
-			taskIndex = 1,
+			step = 1,
+			reeds = 0,
+			clapper = 0,
+			oil = 0,
+			rope = 0,
+			won = false,
+			picked = {},
 		}
 		profiles[plr.UserId] = p
 	end
 	return p
 end
 
-local function assignStall(plr)
-	local p = ensure(plr)
-	if p.stallId then
-		return
-	end
-	for i = 1, 4 do
-		if not stallOwner[i] then
-			stallOwner[i] = plr.UserId
-			p.stallId = i
-			return
-		end
-	end
-	p.stallId = ((plr.UserId % 4) + 1)
+local function stepOf(p)
+	return STEPS[p.step]
 end
 
 local function push(plr, note)
 	local p = ensure(plr)
+	local st = stepOf(p)
 	Remotes.State:FireClient(plr, {
 		build = Config.BuildId,
 		night = night,
-		coins = p.coins,
-		herbs = p.herbs,
-		wood = p.wood,
-		meals = p.meals,
-		rebirths = p.rebirths,
-		stallId = p.stallId,
-		task = TASKS[math.min(p.taskIndex, #TASKS)],
 		seconds = math.max(0, math.floor(phaseEnds - os.clock())),
+		task = p.won and "Festival restored. Walk Millbrook." or (st and st.title or "Done"),
+		hint = p.won and "The Last Bell is ringing." or (st and st.hint or ""),
+		step = p.step,
+		total = #STEPS,
+		won = p.won,
+		reeds = p.reeds,
+		clapper = p.clapper,
+		oil = p.oil,
+		rope = p.rope,
 	})
 	if note then
 		Remotes.Notify:FireClient(plr, note)
-	end
-end
-
-local function bumpTask(p, idx)
-	if p.taskIndex == idx then
-		p.taskIndex = math.min(idx + 1, #TASKS)
 	end
 end
 
@@ -86,19 +123,11 @@ local function near(plr, inst, range)
 	if not hrp then
 		return false
 	end
-	return (hrp.Position - inst.Position).Magnitude <= (range or Config.StealRange)
-end
-
-local function findPromptPart(name)
-	local root = workspace:FindFirstChild("VillageBuild")
-	if not root then
-		return nil
-	end
-	return root:FindFirstChild(name, true)
+	return (hrp.Position - inst.Position).Magnitude <= (range or 16)
 end
 
 Players.PlayerAdded:Connect(function(plr)
-	assignStall(plr)
+	ensure(plr)
 	plr.CharacterAdded:Connect(function(char)
 		task.wait(0.4)
 		local spawn = workspace:FindFirstChild("VillageBuild") and workspace.VillageBuild:FindFirstChild("Plaza")
@@ -106,138 +135,83 @@ Players.PlayerAdded:Connect(function(plr)
 		if spawn and hrp then
 			hrp.CFrame = spawn.CFrame + Vector3.new(0, 6, 18)
 		end
-		push(plr, "Welcome to the village. Your stall is #" .. tostring(ensure(plr).stallId))
+		push(plr, "The Last Bell is silent. Start at the square.")
 	end)
 	push(plr)
 end)
 
 Players.PlayerRemoving:Connect(function(plr)
-	local p = profiles[plr.UserId]
-	if p and p.stallId and stallOwner[p.stallId] == plr.UserId then
-		stallOwner[p.stallId] = nil
-	end
 	profiles[plr.UserId] = nil
 end)
 
-local function onAct(plr, kind)
+local function advance(plr, p, st)
+	if st.give then
+		p[st.give] = 1
+	end
+	if st.ending then
+		p.won = true
+		push(plr, st.complete)
+		return
+	end
+	p.step = math.min(p.step + 1, #STEPS)
+	push(plr, st.complete)
+end
+
+local function onAct(plr, kind, inst)
 	local p = ensure(plr)
-	if kind == "gather" or kind == "herb" then
-		local inst = findPromptPart("Herbs")
-		if inst and near(plr, inst, 16) then
-			p.herbs += 1
-			bumpTask(p, 1)
-			push(plr, "Picked herbs (" .. p.herbs .. ")")
+	if p.won then
+		push(plr, "The bell already rings.")
+		return
+	end
+	local st = stepOf(p)
+	if not st then
+		return
+	end
+
+	if kind == "reed" then
+		if st.id ~= "reeds" then
+			push(plr, "You do not need reeds yet.")
 			return
 		end
-	end
-	if kind == "gather" or kind == "wood" then
-		local inst = findPromptPart("WoodBlock")
-		if inst and near(plr, inst, 16) then
-			p.wood += 1
-			bumpTask(p, 2)
-			push(plr, "Chopped wood (" .. p.wood .. ")")
+		if inst and p.picked[inst] then
+			return
 		end
-	elseif kind == "cook" then
-		local inst = findPromptPart("Kitchen")
-		if inst and near(plr, inst, 16) then
-			if p.herbs < 1 or p.wood < 1 then
-				push(plr, "Need 1 herb and 1 wood to cook")
-				return
-			end
-			p.herbs -= 1
-			p.wood -= 1
-			p.meals += 1
-			p.coins += Config.MealValue
-			bumpTask(p, 3)
-			push(plr, "Cooked a meal +" .. Config.MealValue .. " coins")
+		if inst and not near(plr, inst, 14) then
+			push(plr, "Get closer to the reed bed.")
+			return
 		end
-	elseif kind == "bank" then
-		local id = p.stallId
-		local chest = nil
-		local root = workspace:FindFirstChild("VillageBuild")
-		if root then
-			local stall = root:FindFirstChild("PlayerStalls") and root.PlayerStalls:FindFirstChild("Stall_" .. tostring(id))
-			if stall then
-				chest = stall:FindFirstChild("StallChest")
-			end
+		if inst then
+			p.picked[inst] = true
 		end
-		if chest and near(plr, chest, 14) then
-			local add = p.herbs * Config.HerbValue + p.wood * Config.WoodValue
-			if add <= 0 then
-				push(plr, "Satchel empty")
-				return
-			end
-			p.coins += add
-			p.herbs = 0
-			p.wood = 0
-			bumpTask(p, 4)
-			push(plr, "Banked goods. Coins " .. p.coins)
+		p.reeds += 1
+		if p.reeds >= (st.need or 5) then
+			advance(plr, p, st)
 		else
-			push(plr, "Stand at YOUR stall chest (Q)")
+			push(plr, string.format("River Reed %d / %d", p.reeds, st.need or 5))
 		end
-	elseif kind == "steal" then
-		if not night then
-			push(plr, "Steal is night only")
-			return
-		end
-		local root = workspace:FindFirstChild("VillageBuild")
-		local stalls = root and root:FindFirstChild("PlayerStalls")
-		if not stalls then
-			return
-		end
-		local stolen = false
-		for _, stall in ipairs(stalls:GetChildren()) do
-			local chest = stall:FindFirstChild("StallChest")
-			if chest and near(plr, chest, 12) then
-				local sid = chest:GetAttribute("StallId")
-				local ownerId = stallOwner[sid]
-				if ownerId == plr.UserId then
-					push(plr, "That is your stall")
-					return
-				end
-				if not ownerId then
-					push(plr, "Empty stall")
-					return
-				end
-				local victim = profiles[ownerId]
-				if victim and victim.coins > 0 then
-					local take = math.min(12, math.max(4, math.floor(victim.coins * 0.2)))
-					victim.coins -= take
-					p.coins += take
-					stolen = true
-					bumpTask(p, 5)
-					push(plr, "Stole " .. take .. " coins")
-					local vplr = Players:GetPlayerByUserId(ownerId)
-					if vplr then
-						push(vplr, plr.DisplayName .. " robbed your stall (-" .. take .. ")")
-					end
-				else
-					push(plr, "Nothing to steal")
-				end
-				return
-			end
-		end
-		if not stolen then
-			push(plr, "Get closer to another player's stall")
-		end
-	elseif kind == "rebirth" then
-		local altar = findPromptPart("Altar")
-		if altar and near(plr, altar, 16) then
-			if p.coins < Config.BankGoal then
-				push(plr, "Need " .. Config.BankGoal .. " coins to rebirth")
-				return
-			end
-			p.coins = 0
-			p.herbs = 0
-			p.wood = 0
-			p.meals = 0
-			p.rebirths += 1
-			p.taskIndex = 1
-			push(plr, "Rebirth " .. p.rebirths .. ". Loop resets.")
-		end
-	elseif kind == "notice" then
-		push(plr, TASKS[math.min(p.taskIndex, #TASKS)])
+		return
 	end
+
+	if kind ~= st.prompt and kind ~= st.id then
+		push(plr, "Not yet. " .. st.hint)
+		return
+	end
+
+	if st.needItem and (p[st.needItem] or 0) < (st.needCount or 1) then
+		push(plr, "Bring the river reeds first.")
+		return
+	end
+
+	if st.needAll then
+		for _, id in ipairs(st.needAll) do
+			if (p[id] or 0) < 1 then
+				push(plr, "You are still missing a piece of the bell.")
+				return
+			end
+		end
+	end
+
+	advance(plr, p, st)
 end
 
 Remotes.Act.OnServerEvent:Connect(function(plr, kind)
@@ -273,20 +247,10 @@ task.spawn(function()
 			return
 		end
 		inst.Triggered:Connect(function(plr)
-			if inst.Name == "HerbPrompt" then
-				onAct(plr, "herb")
-			elseif inst.Name == "WoodPrompt" then
-				onAct(plr, "wood")
-			elseif inst.Name == "CookPrompt" then
-				onAct(plr, "cook")
-			elseif inst.Name == "BankPrompt" then
-				onAct(plr, "bank")
-			elseif inst.Name == "StealPrompt" then
-				onAct(plr, "steal")
-			elseif inst.Name == "RebirthPrompt" then
-				onAct(plr, "rebirth")
-			elseif inst.Name == "NoticePrompt" then
-				onAct(plr, "notice")
+			if inst.Name == "ReedPrompt" then
+				onAct(plr, "reed", inst.Parent)
+			else
+				onAct(plr, inst.Name, inst.Parent)
 			end
 		end)
 	end
