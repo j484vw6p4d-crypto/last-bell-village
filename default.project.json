@@ -24,7 +24,8 @@
       "StarterPlayerScripts": {
         "$className": "StarterPlayerScripts",
         "$ignoreUnknownInstances": true,
-        "VillageHud": { "$path": "src/StarterPlayer/StarterPlayerScripts/VillageHud.client.lua" }
+        "VillageHud": { "$path": "src/StarterPlayer/StarterPlayerScripts/VillageHud.client.lua" },
+        "Fly": { "$path": "src/StarterPlayer/StarterPlayerScripts/Fly.client.lua" }
       }
     },
     "Workspace": {

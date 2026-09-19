@@ -1,5 +1,5 @@
 --!nocheck
--- VILLAGE-12: futuristic village on Test 1 terrain. Opening doors, real lamp fixtures.
+-- VILLAGE-13: futuristic village on Test 1 terrain. Opening doors, real lamp fixtures.
 -- Never Terrain:Clear. Keeps hills; wipes place junk/Baseplate.
 local World = {}
 
@@ -348,22 +348,23 @@ local function clearAllPlaceJunk()
 end
 
 local function pickBaseSpots()
+	-- Spread across the WHOLE Test 1 map (far from hub + each other).
 	local rng = Random.new(20260919)
 	local spots = {}
 	local tries = 0
-	while #spots < 4 and tries < 400 do
+	while #spots < 4 and tries < 600 do
 		tries += 1
 		local angle = rng:NextNumber(0, math.pi * 2)
-		local dist = rng:NextNumber(260, 440)
+		local dist = rng:NextNumber(520, 900)
 		local x = math.cos(angle) * dist
 		local z = math.sin(angle) * dist
-		local farFromHub = math.abs(x) >= 140 or math.abs(z) >= 140
+		local farFromHub = math.abs(x) >= 400 or math.abs(z) >= 400
 		if farFromHub then
 			local ok = true
 			for _, s in ipairs(spots) do
 				local dx = s[1] - x
 				local dz = s[2] - z
-				if math.sqrt(dx * dx + dz * dz) < 300 then
+				if math.sqrt(dx * dx + dz * dz) < 480 then
 					ok = false
 					break
 				end
@@ -374,11 +375,12 @@ local function pickBaseSpots()
 		end
 	end
 	if #spots < 4 then
+		-- Cardinal corners of a huge playable square
 		spots = {
-			{ 340, 90 },
-			{ -320, 150 },
-			{ 280, -300 },
-			{ -260, -320 },
+			{ 720, 280 },
+			{ -680, 420 },
+			{ 600, -720 },
+			{ -640, -650 },
 		}
 	end
 	return spots
@@ -592,15 +594,15 @@ function World.build()
 
 	-- short roads
 	for _, xz in ipairs({
-		{ 0, -45, 10, 0.4, 55 }, { 0, 45, 10, 0.4, 55 },
-		{ -45, 0, 55, 0.4, 10 }, { 45, 0, 55, 0.4, 10 },
+		{ 0, -80, 12, 0.4, 100 }, { 0, 80, 12, 0.4, 100 },
+		{ -80, 0, 100, 0.4, 12 }, { 80, 0, 100, 0.4, 12 },
 	}) do
 		local cf = select(1, at(xz[1], xz[2], ignore))
 		part("Road", Vector3.new(xz[3], xz[4], xz[5]), cf * CFrame.new(0, 0.25, 0), Color3.fromRGB(45, 50, 60), root, Enum.Material.Concrete)
 	end
 
 	-- Chapel (futuristic)
-	local chapelCF = select(1, at(0, -85, ignore))
+	local chapelCF = select(1, at(0, -380, ignore))
 	local chapel = Instance.new("Model")
 	chapel.Name = "ChapelOfTheLastBell"
 	chapel.Parent = root
@@ -615,32 +617,32 @@ function World.build()
 	prompt(altar, "RebirthPrompt", "Last Bell", "Rebirth", Enum.KeyCode.P, 16)
 
 	-- Willow / Ash / Inn / Reed / Smith — spaced so labels don't pile on Miller porch
-	local willowCF = select(1, at(-70, 25, ignore))
+	local willowCF = select(1, at(-420, 180, ignore))
 	house(root, "WillowHome", willowCF, Color3.fromRGB(45, 70, 65), Color3.fromRGB(22, 30, 28))
 	local herbs = part("Herbs", Vector3.new(7, 1.4, 7), willowCF * CFrame.new(0, 1.4, -22), Color3.fromRGB(60, 170, 90), root, Enum.Material.Grass)
 	sign(herbs, "WILLOW · E gather herbs", Vector3.new(0, 5, 0), Color3.fromRGB(160, 255, 180))
 	prompt(herbs, "HerbPrompt", "Herb garden", "Gather herbs", Enum.KeyCode.E, 15)
 
-	local ashCF = select(1, at(70, 25, ignore))
+	local ashCF = select(1, at(440, 160, ignore))
 	house(root, "AshCottage", ashCF, Color3.fromRGB(70, 55, 50), Color3.fromRGB(30, 24, 22))
 	local wood = part("WoodStation", Vector3.new(6, 2.2, 5), ashCF * CFrame.new(0, 1.6, -22), Color3.fromRGB(70, 80, 95), root, Enum.Material.Metal)
 	sign(wood, "ASH · E chop wood", Vector3.new(0, 5, 0), Color3.fromRGB(255, 210, 150))
 	prompt(wood, "WoodPrompt", "Woodpile", "Chop wood", Enum.KeyCode.E, 15)
 
-	local innCF = select(1, at(0, 85, ignore))
+	local innCF = select(1, at(40, 420, ignore))
 	local inn = house(root, "LastBellInn", innCF, Color3.fromRGB(55, 50, 70), Color3.fromRGB(24, 22, 32))
 	local kitchen = part("Kitchen", Vector3.new(8, 2.2, 8), innCF * CFrame.new(12, 2, 18), Color3.fromRGB(50, 60, 80), inn, Enum.Material.Metal)
 	part("Stove", Vector3.new(4, 2.5, 3), innCF * CFrame.new(12, 2.4, 20), Color3.fromRGB(30, 35, 45), inn, Enum.Material.Metal)
 	sign(kitchen, "INN · F cook meal", Vector3.new(0, 5, 0), Color3.fromRGB(255, 190, 140))
 	prompt(kitchen, "CookPrompt", "Inn kitchen", "Cook meal", Enum.KeyCode.F, 15)
 
-	local reedCF = select(1, at(-65, -45, ignore))
+	local reedCF = select(1, at(-400, -320, ignore))
 	house(root, "ReedHouse", reedCF, Color3.fromRGB(50, 65, 55), Color3.fromRGB(22, 28, 24))
 	local reedHerbs = part("ReedHerbs", Vector3.new(6, 1.3, 6), reedCF * CFrame.new(10, 1.3, -20), Color3.fromRGB(50, 140, 70), root, Enum.Material.Grass)
 	sign(reedHerbs, "REED · E extra herbs", Vector3.new(0, 5, 0), Color3.fromRGB(180, 255, 190))
 	prompt(reedHerbs, "HerbPrompt", "River herbs", "Gather herbs", Enum.KeyCode.E, 14)
 
-	local smithCF = select(1, at(65, -45, ignore))
+	local smithCF = select(1, at(420, -300, ignore))
 	house(root, "MillbrookSmithy", smithCF, Color3.fromRGB(60, 55, 50), Color3.fromRGB(28, 26, 24))
 	local coals = part("Coals", Vector3.new(4.5, 0.7, 3), smithCF * CFrame.new(-8, 2.2, -20), Color3.fromRGB(80, 200, 255), root, Enum.Material.Neon)
 	coals.CanCollide = false
@@ -658,11 +660,11 @@ function World.build()
 		buildBase(bases, i, s[1], s[2], ignore)
 	end
 
-	watcher(root, -35, -110, ignore)
-	watcher(root, 35, -110, ignore)
-	watcher(root, 0, 110, ignore)
+	watcher(root, -220, -500, ignore)
+	watcher(root, 220, -500, ignore)
+	watcher(root, 0, 520, ignore)
 
-	print(string.format("[Village] VILLAGE-12 futuristic on Test 1 ground (hubY=%.1f)", hubY))
+	print(string.format("[Village] VILLAGE-13 futuristic on Test 1 ground (hubY=%.1f)", hubY))
 	return root
 end
 
