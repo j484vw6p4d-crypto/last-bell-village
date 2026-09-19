@@ -1,5 +1,5 @@
 --!nocheck
--- VILLAGE-15: futuristic village on Test 1 terrain. Opening doors, real lamp fixtures.
+-- VILLAGE-16: country village on Test 1 terrain. Opening doors, real lamp fixtures.
 -- Never Terrain:Clear. Keeps hills; wipes place junk/Baseplate.
 local World = {}
 
@@ -49,7 +49,7 @@ local function sign(adornee, text, offset, color)
 	t.BorderSizePixel = 0
 	t.Size = UDim2.fromScale(1, 1)
 	t.Text = text
-	t.TextColor3 = color or Color3.fromRGB(120, 230, 255)
+	t.TextColor3 = color or Color3.fromRGB(255, 210, 140)
 	t.Font = Enum.Font.GothamBold
 	t.TextScaled = true
 	t.TextStrokeTransparency = 0.5
@@ -77,7 +77,7 @@ local function lightOn(parent, offset, color, range, brightness)
 	a.Position = offset or Vector3.new(0, 0, 0)
 	a.Parent = parent
 	local l = Instance.new("PointLight")
-	l.Color = color or Color3.fromRGB(140, 220, 255)
+	l.Color = color or Color3.fromRGB(255, 200, 130)
 	l.Brightness = brightness or 1.6
 	l.Range = range or 22
 	l.Shadows = true
@@ -88,16 +88,17 @@ end
 -- Proper futuristic lamp post (metal pole + glass housing + small neon core)
 local function lantern(parent, x, y, z)
 	local cf = CFrame.new(x, y, z)
-	part("LampPole", Vector3.new(0.55, 12, 0.55), cf * CFrame.new(0, 6, 0), Color3.fromRGB(35, 40, 50), parent, Enum.Material.Metal)
-	part("LampArm", Vector3.new(3.2, 0.35, 0.35), cf * CFrame.new(1.4, 11.5, 0), Color3.fromRGB(45, 50, 60), parent, Enum.Material.Metal)
-	part("LampHousing", Vector3.new(1.8, 1.1, 1.8), cf * CFrame.new(2.6, 11.2, 0), Color3.fromRGB(55, 65, 80), parent, Enum.Material.Metal)
-	local glass = part("LampGlass", Vector3.new(1.4, 0.9, 1.4), cf * CFrame.new(2.6, 11.2, 0), Color3.fromRGB(180, 230, 255), parent, Enum.Material.Glass)
-	glass.Transparency = 0.45
+	part("LampPole", Vector3.new(0.45, 11, 0.45), cf * CFrame.new(0, 5.5, 0), Color3.fromRGB(72, 48, 28), parent, Enum.Material.Wood)
+	part("LampArm", Vector3.new(2.4, 0.3, 0.3), cf * CFrame.new(1.1, 10.6, 0), Color3.fromRGB(72, 48, 28), parent, Enum.Material.Wood)
+	part("LampCage", Vector3.new(1.5, 1.8, 1.5), cf * CFrame.new(2.2, 10.2, 0), Color3.fromRGB(55, 55, 60), parent, Enum.Material.Metal)
+	local glass = part("LampGlass", Vector3.new(1.15, 1.4, 1.15), cf * CFrame.new(2.2, 10.2, 0), Color3.fromRGB(255, 220, 140), parent, Enum.Material.Glass)
+	glass.Transparency = 0.35
 	glass.CanCollide = false
-	local core = part("LampCore", Vector3.new(0.55, 0.55, 0.55), cf * CFrame.new(2.6, 11.2, 0), Color3.fromRGB(120, 230, 255), parent, Enum.Material.Neon)
+	local core = part("LampFlame", Vector3.new(0.45, 0.55, 0.45), cf * CFrame.new(2.2, 10.15, 0), Color3.fromRGB(255, 170, 70), parent, Enum.Material.Neon)
 	core.CanCollide = false
-	lightOn(core, Vector3.new(), Color3.fromRGB(130, 220, 255), 26, 2.0)
+	lightOn(core, Vector3.zero, Color3.fromRGB(255, 180, 90), 22, 1.7)
 end
+
 
 local function groundY(x, z, ignore)
 	local params = RaycastParams.new()
@@ -245,7 +246,7 @@ end
 
 local function furnitureTable(parent, cf)
 	part("TableTop", Vector3.new(8, 0.35, 4), cf * CFrame.new(0, 2.5, 0), Color3.fromRGB(40, 48, 60), parent, Enum.Material.Metal)
-	part("TableGlow", Vector3.new(7.2, 0.08, 3.2), cf * CFrame.new(0, 2.7, 0), Color3.fromRGB(80, 220, 255), parent, Enum.Material.Neon).CanCollide = false
+	part("TableGlow", Vector3.new(7.2, 0.08, 3.2), cf * CFrame.new(0, 2.7, 0), Color3.fromRGB(255, 190, 100), parent, Enum.Material.Neon).CanCollide = false
 	for _, o in ipairs({
 		Vector3.new(-3.2, 1.15, -1.4), Vector3.new(3.2, 1.15, -1.4),
 		Vector3.new(-3.2, 1.15, 1.4), Vector3.new(3.2, 1.15, 1.4),
@@ -257,7 +258,7 @@ end
 local function furnitureChair(parent, cf)
 	part("Seat", Vector3.new(2.1, 0.3, 2.1), cf * CFrame.new(0, 1.55, 0), Color3.fromRGB(35, 42, 55), parent, Enum.Material.SmoothPlastic)
 	part("Back", Vector3.new(2.1, 2.2, 0.28), cf * CFrame.new(0, 2.7, 0.9), Color3.fromRGB(35, 42, 55), parent, Enum.Material.SmoothPlastic)
-	part("BackGlow", Vector3.new(1.6, 0.15, 0.12), cf * CFrame.new(0, 3.5, 0.9), Color3.fromRGB(80, 220, 255), parent, Enum.Material.Neon).CanCollide = false
+	part("BackGlow", Vector3.new(1.6, 0.15, 0.12), cf * CFrame.new(0, 3.5, 0.9), Color3.fromRGB(255, 190, 100), parent, Enum.Material.Neon).CanCollide = false
 	for _, o in ipairs({
 		Vector3.new(-0.75, 0.7, -0.75), Vector3.new(0.75, 0.7, -0.75),
 		Vector3.new(-0.75, 0.7, 0.75), Vector3.new(0.75, 0.7, 0.75),
@@ -297,12 +298,12 @@ end
 
 local function furnitureRug(parent, cf, color)
 	part("Rug", Vector3.new(12, 0.12, 8), cf, color or Color3.fromRGB(25, 60, 90), parent, Enum.Material.Fabric)
-	part("RugEdge", Vector3.new(12.2, 0.08, 8.2), cf * CFrame.new(0, -0.05, 0), Color3.fromRGB(80, 220, 255), parent, Enum.Material.Neon).CanCollide = false
+	part("RugEdge", Vector3.new(12.2, 0.08, 8.2), cf * CFrame.new(0, -0.05, 0), Color3.fromRGB(255, 190, 100), parent, Enum.Material.Neon).CanCollide = false
 end
 
 local function furnitureBarrel(parent, cf)
 	part("Crate", Vector3.new(2.8, 2.8, 2.8), cf * CFrame.new(0, 1.4, 0), Color3.fromRGB(45, 55, 70), parent, Enum.Material.Metal)
-	part("CrateGlow", Vector3.new(2.9, 0.15, 2.9), cf * CFrame.new(0, 2.6, 0), Color3.fromRGB(80, 220, 255), parent, Enum.Material.Neon).CanCollide = false
+	part("CrateGlow", Vector3.new(2.9, 0.15, 2.9), cf * CFrame.new(0, 2.6, 0), Color3.fromRGB(255, 190, 100), parent, Enum.Material.Neon).CanCollide = false
 end
 
 local function applyHighEndGraphics()
@@ -310,15 +311,15 @@ local function applyHighEndGraphics()
 		Lighting.Technology = Enum.Technology.Future
 	end)
 	Lighting.Brightness = 2.6
-	Lighting.Ambient = Color3.fromRGB(40, 55, 80)
-	Lighting.OutdoorAmbient = Color3.fromRGB(70, 90, 120)
-	Lighting.ColorShift_Top = Color3.fromRGB(180, 220, 255)
+	Lighting.Ambient = Color3.fromRGB(90, 85, 75)
+	Lighting.OutdoorAmbient = Color3.fromRGB(130, 125, 110)
+	Lighting.ColorShift_Top = Color3.fromRGB(255, 230, 190)
 	Lighting.ColorShift_Bottom = Color3.fromRGB(20, 30, 50)
 	Lighting.EnvironmentDiffuseScale = 1
 	Lighting.EnvironmentSpecularScale = 1
 	Lighting.GlobalShadows = true
 	Lighting.ShadowSoftness = 0.15
-	Lighting.ClockTime = 17.2
+	Lighting.ClockTime = 16.0
 	Lighting.GeographicLatitude = 20
 	Lighting.ExposureCompensation = 0.2
 
@@ -433,196 +434,326 @@ end
 
 
 -- Futuristic building shell with real door opening
-local function furnitureLiving(m, origin)
-	-- sofa
-	part("SofaBase", Vector3.new(8, 1.2, 2.8), origin * CFrame.new(-10, 1.4, -4), Color3.fromRGB(45, 70, 95), m, Enum.Material.Fabric)
-	part("SofaBack", Vector3.new(8, 2.2, 0.7), origin * CFrame.new(-10, 2.6, -2.9), Color3.fromRGB(40, 60, 85), m, Enum.Material.Fabric)
-	part("SofaArmL", Vector3.new(0.7, 1.6, 2.8), origin * CFrame.new(-14, 2.0, -4), Color3.fromRGB(40, 60, 85), m, Enum.Material.Fabric)
-	part("SofaArmR", Vector3.new(0.7, 1.6, 2.8), origin * CFrame.new(-6, 2.0, -4), Color3.fromRGB(40, 60, 85), m, Enum.Material.Fabric)
-	-- coffee table
-	part("CoffeeTop", Vector3.new(4.5, 0.3, 2.2), origin * CFrame.new(-10, 1.6, -7.2), Color3.fromRGB(55, 42, 30), m, Enum.Material.Wood)
-	part("CoffeeLeg", Vector3.new(0.35, 1.3, 0.35), origin * CFrame.new(-11.5, 0.9, -7.2), Color3.fromRGB(40, 30, 22), m, Enum.Material.Wood)
-	part("CoffeeLeg2", Vector3.new(0.35, 1.3, 0.35), origin * CFrame.new(-8.5, 0.9, -7.2), Color3.fromRGB(40, 30, 22), m, Enum.Material.Wood)
-	-- rug
-	part("Rug", Vector3.new(12, 0.12, 8), origin * CFrame.new(-10, 0.85, -5), Color3.fromRGB(90, 45, 50), m, Enum.Material.Fabric)
-	-- TV / media wall
-	part("MediaWall", Vector3.new(7, 4.5, 0.4), origin * CFrame.new(-10, 3.5, -12.5), Color3.fromRGB(30, 34, 42), m, Enum.Material.SmoothPlastic)
-	part("Screen", Vector3.new(5.5, 3.2, 0.15), origin * CFrame.new(-10, 3.6, -12.7), Color3.fromRGB(20, 40, 60), m, Enum.Material.Glass)
-	part("ScreenGlow", Vector3.new(5.2, 2.9, 0.05), origin * CFrame.new(-10, 3.6, -12.85), Color3.fromRGB(80, 180, 255), m, Enum.Material.Neon).CanCollide = false
-	-- dining
-	part("DiningTop", Vector3.new(7.5, 0.35, 3.6), origin * CFrame.new(6, 2.4, -6), Color3.fromRGB(110, 80, 50), m, Enum.Material.Wood)
-	for _, o in ipairs({ Vector3.new(3.2, 1.1, -1.3), Vector3.new(-3.2, 1.1, -1.3), Vector3.new(3.2, 1.1, 1.3), Vector3.new(-3.2, 1.1, 1.3) }) do
-		part("DLeg", Vector3.new(0.35, 2.2, 0.35), origin * CFrame.new(6, 0, -6) * CFrame.new(o), Color3.fromRGB(70, 50, 32), m, Enum.Material.Wood)
+-- ===== Country furniture (reads as real furniture, not neon slabs) =====
+local function chair(m, cf)
+	part("Seat", Vector3.new(2.0, 0.28, 2.0), cf * CFrame.new(0, 1.55, 0), Color3.fromRGB(120, 78, 42), m, Enum.Material.Wood)
+	part("Cushion", Vector3.new(1.85, 0.22, 1.85), cf * CFrame.new(0, 1.78, 0), Color3.fromRGB(140, 70, 55), m, Enum.Material.Fabric)
+	part("Back", Vector3.new(2.0, 2.1, 0.28), cf * CFrame.new(0, 2.7, 0.9), Color3.fromRGB(110, 72, 38), m, Enum.Material.Wood)
+	part("BackSlat", Vector3.new(1.5, 0.15, 0.12), cf * CFrame.new(0, 3.3, 0.95), Color3.fromRGB(90, 58, 30), m, Enum.Material.Wood)
+	for _, o in ipairs({
+		Vector3.new(-0.75, 0.7, -0.75), Vector3.new(0.75, 0.7, -0.75),
+		Vector3.new(-0.75, 0.7, 0.75), Vector3.new(0.75, 0.7, 0.75),
+	}) do
+		part("Leg", Vector3.new(0.22, 1.4, 0.22), cf * CFrame.new(o), Color3.fromRGB(85, 55, 28), m, Enum.Material.Wood)
 	end
-	for _, o in ipairs({ -2.2, 0, 2.2 }) do
-		part("ChairSeat", Vector3.new(1.8, 0.3, 1.8), origin * CFrame.new(6 + o, 1.5, -8.2), Color3.fromRGB(80, 55, 35), m, Enum.Material.Wood)
-		part("ChairBack", Vector3.new(1.8, 2.0, 0.3), origin * CFrame.new(6 + o, 2.5, -7.4), Color3.fromRGB(80, 55, 35), m, Enum.Material.Wood)
-	end
-	-- kitchen counter
-	part("Counter", Vector3.new(10, 2.2, 2.4), origin * CFrame.new(10, 1.9, 2), Color3.fromRGB(55, 60, 70), m, Enum.Material.SmoothPlastic)
-	part("CounterTop", Vector3.new(10.2, 0.25, 2.6), origin * CFrame.new(10, 3.1, 2), Color3.fromRGB(200, 205, 210), m, Enum.Material.Marble)
-	part("Sink", Vector3.new(2.2, 0.35, 1.6), origin * CFrame.new(8, 3.3, 2), Color3.fromRGB(170, 180, 190), m, Enum.Material.Metal)
-	part("Cabinets", Vector3.new(10, 2.5, 1.2), origin * CFrame.new(10, 5.5, 3.2), Color3.fromRGB(45, 50, 60), m, Enum.Material.SmoothPlastic)
-	part("Fridge", Vector3.new(2.6, 5.5, 2.4), origin * CFrame.new(15.5, 3.5, 2), Color3.fromRGB(220, 225, 230), m, Enum.Material.Metal)
 end
 
-local function furnitureBedroom(m, origin)
-	part("BedFrame", Vector3.new(8.5, 1.0, 12), origin * CFrame.new(12, 1.3, 8), Color3.fromRGB(55, 40, 28), m, Enum.Material.Wood)
-	part("Mattress", Vector3.new(8, 1.1, 11.2), origin * CFrame.new(12, 2.2, 8), Color3.fromRGB(230, 230, 235), m, Enum.Material.Fabric)
-	part("Blanket", Vector3.new(8, 0.4, 7), origin * CFrame.new(12, 2.85, 9.5), Color3.fromRGB(70, 110, 160), m, Enum.Material.Fabric)
-	part("Pillow", Vector3.new(7, 0.6, 2.2), origin * CFrame.new(12, 2.9, 3.5), Color3.fromRGB(245, 245, 248), m, Enum.Material.Fabric)
-	part("Headboard", Vector3.new(8.8, 4.2, 0.45), origin * CFrame.new(12, 3.5, 2.2), Color3.fromRGB(45, 32, 22), m, Enum.Material.Wood)
-	part("NightL", Vector3.new(2.2, 2.0, 2.2), origin * CFrame.new(7, 1.8, 3.5), Color3.fromRGB(70, 50, 35), m, Enum.Material.Wood)
-	part("NightR", Vector3.new(2.2, 2.0, 2.2), origin * CFrame.new(17, 1.8, 3.5), Color3.fromRGB(70, 50, 35), m, Enum.Material.Wood)
-	local lamp = part("BedLamp", Vector3.new(0.7, 0.7, 0.7), origin * CFrame.new(7, 3.3, 3.5), Color3.fromRGB(255, 220, 160), m, Enum.Material.Neon)
+local function table4(m, cf, sx, sz)
+	sx = sx or 6.5
+	sz = sz or 3.2
+	part("Top", Vector3.new(sx, 0.3, sz), cf * CFrame.new(0, 2.45, 0), Color3.fromRGB(130, 90, 50), m, Enum.Material.Wood)
+	for _, o in ipairs({
+		Vector3.new(-sx / 2 + 0.4, 1.15, -sz / 2 + 0.4),
+		Vector3.new(sx / 2 - 0.4, 1.15, -sz / 2 + 0.4),
+		Vector3.new(-sx / 2 + 0.4, 1.15, sz / 2 - 0.4),
+		Vector3.new(sx / 2 - 0.4, 1.15, sz / 2 - 0.4),
+	}) do
+		part("TLeg", Vector3.new(0.32, 2.3, 0.32), cf * CFrame.new(o), Color3.fromRGB(90, 60, 32), m, Enum.Material.Wood)
+	end
+end
+
+local function bed(m, cf)
+	part("Frame", Vector3.new(7.5, 0.9, 11), cf * CFrame.new(0, 1.1, 0), Color3.fromRGB(95, 62, 34), m, Enum.Material.Wood)
+	part("Mattress", Vector3.new(7.0, 1.0, 10.2), cf * CFrame.new(0, 1.95, 0), Color3.fromRGB(235, 230, 220), m, Enum.Material.Fabric)
+	part("Sheet", Vector3.new(7.0, 0.35, 6.5), cf * CFrame.new(0, 2.55, 1.4), Color3.fromRGB(70, 100, 75), m, Enum.Material.Fabric)
+	part("Pillow", Vector3.new(6.2, 0.55, 2.0), cf * CFrame.new(0, 2.6, -3.8), Color3.fromRGB(245, 240, 230), m, Enum.Material.Fabric)
+	part("Headboard", Vector3.new(7.8, 3.8, 0.4), cf * CFrame.new(0, 3.2, -5.3), Color3.fromRGB(85, 55, 30), m, Enum.Material.Wood)
+	part("Footboard", Vector3.new(7.6, 1.6, 0.35), cf * CFrame.new(0, 2.3, 5.3), Color3.fromRGB(85, 55, 30), m, Enum.Material.Wood)
+	for _, o in ipairs({
+		Vector3.new(-3.3, 0.55, -4.8), Vector3.new(3.3, 0.55, -4.8),
+		Vector3.new(-3.3, 0.55, 4.8), Vector3.new(3.3, 0.55, 4.8),
+	}) do
+		part("Post", Vector3.new(0.35, 1.1, 0.35), cf * CFrame.new(o), Color3.fromRGB(75, 48, 26), m, Enum.Material.Wood)
+	end
+end
+
+local function dresser(m, cf)
+	part("Body", Vector3.new(5.5, 3.6, 2.2), cf * CFrame.new(0, 2.5, 0), Color3.fromRGB(105, 72, 40), m, Enum.Material.Wood)
+	for i = 0, 2 do
+		part("Drawer", Vector3.new(5.0, 0.9, 0.15), cf * CFrame.new(0, 1.3 + i * 1.1, -1.15), Color3.fromRGB(120, 85, 50), m, Enum.Material.Wood)
+		part("Knob", Vector3.new(0.25, 0.25, 0.25), cf * CFrame.new(0, 1.3 + i * 1.1, -1.3), Color3.fromRGB(180, 150, 70), m, Enum.Material.Metal)
+	end
+end
+
+local function fireplace(m, cf)
+	part("Stone", Vector3.new(7.5, 8.5, 2.4), cf * CFrame.new(0, 4.8, 0), Color3.fromRGB(120, 115, 105), m, Enum.Material.Limestone)
+	part("Opening", Vector3.new(4.2, 3.6, 1.2), cf * CFrame.new(0, 2.8, -0.8), Color3.fromRGB(25, 20, 18), m, Enum.Material.SmoothPlastic)
+	part("Mantel", Vector3.new(8.2, 0.55, 2.8), cf * CFrame.new(0, 6.8, -0.2), Color3.fromRGB(90, 60, 35), m, Enum.Material.Wood)
+	local fire = part("Fire", Vector3.new(3.2, 2.0, 0.8), cf * CFrame.new(0, 2.2, -0.5), Color3.fromRGB(255, 120, 40), m, Enum.Material.Neon)
+	fire.CanCollide = false
+	lightOn(fire, Vector3.new(0, 0.5, -0.5), Color3.fromRGB(255, 130, 50), 18, 1.6)
+	part("Hearth", Vector3.new(8, 0.4, 3.2), cf * CFrame.new(0, 0.5, -0.6), Color3.fromRGB(100, 95, 90), m, Enum.Material.Slate)
+end
+
+local function rug(m, cf, color)
+	part("Rug", Vector3.new(10, 0.1, 7), cf, color or Color3.fromRGB(120, 55, 45), m, Enum.Material.Fabric)
+end
+
+local function shelf(m, cf)
+	part("Back", Vector3.new(6.5, 7.5, 0.35), cf * CFrame.new(0, 4.5, 0.7), Color3.fromRGB(95, 65, 35), m, Enum.Material.Wood)
+	for i = 0, 3 do
+		part("Board", Vector3.new(6.2, 0.25, 1.3), cf * CFrame.new(0, 1.4 + i * 1.8, 0), Color3.fromRGB(110, 78, 42), m, Enum.Material.Wood)
+	end
+	for i = 0, 4 do
+		part("Book", Vector3.new(0.55, 1.3, 1.0), cf * CFrame.new(-2 + i * 1.0, 2.2, 0), Color3.fromRGB(80 + i * 20, 40, 35), m, Enum.Material.SmoothPlastic)
+	end
+end
+
+local function kitchenCounter(m, cf)
+	part("Base", Vector3.new(9, 2.3, 2.4), cf * CFrame.new(0, 1.9, 0), Color3.fromRGB(100, 70, 42), m, Enum.Material.Wood)
+	part("Top", Vector3.new(9.2, 0.28, 2.6), cf * CFrame.new(0, 3.15, 0), Color3.fromRGB(210, 200, 185), m, Enum.Material.Marble)
+	part("Sink", Vector3.new(2.0, 0.35, 1.5), cf * CFrame.new(-2, 3.35, 0), Color3.fromRGB(170, 175, 180), m, Enum.Material.Metal)
+	part("Cupboard", Vector3.new(9, 2.2, 1.1), cf * CFrame.new(0, 5.2, 1.0), Color3.fromRGB(95, 65, 38), m, Enum.Material.Wood)
+end
+
+-- Shell variants inspired by common countryside cottages
+local STYLES = {
+	miller = {
+		wall = Color3.fromRGB(232, 222, 205),
+		timber = Color3.fromRGB(92, 60, 32),
+		roof = Color3.fromRGB(70, 55, 45),
+		trim = Color3.fromRGB(92, 60, 32),
+		kind = "timber", -- white plaster + dark beams
+	},
+	willow = {
+		wall = Color3.fromRGB(145, 95, 70),
+		timber = Color3.fromRGB(70, 45, 28),
+		roof = Color3.fromRGB(55, 70, 50),
+		trim = Color3.fromRGB(55, 90, 55),
+		kind = "cabin", -- warm wood cabin
+	},
+	ash = {
+		wall = Color3.fromRGB(165, 85, 65),
+		timber = Color3.fromRGB(80, 50, 35),
+		roof = Color3.fromRGB(85, 85, 90),
+		trim = Color3.fromRGB(200, 200, 195),
+		kind = "brick", -- brick cottage
+	},
+	inn = {
+		wall = Color3.fromRGB(180, 140, 100),
+		timber = Color3.fromRGB(75, 48, 28),
+		roof = Color3.fromRGB(95, 45, 35),
+		trim = Color3.fromRGB(120, 40, 35),
+		kind = "inn", -- larger inn
+	},
+	reed = {
+		wall = Color3.fromRGB(210, 200, 160),
+		timber = Color3.fromRGB(100, 78, 45),
+		roof = Color3.fromRGB(120, 100, 55),
+		trim = Color3.fromRGB(70, 110, 70),
+		kind = "thatch", -- cream walls, straw roof tone
+	},
+	smith = {
+		wall = Color3.fromRGB(110, 105, 100),
+		timber = Color3.fromRGB(60, 55, 50),
+		roof = Color3.fromRGB(50, 50, 55),
+		trim = Color3.fromRGB(140, 90, 40),
+		kind = "stone", -- stone workshop house
+	},
+	base = {
+		wall = Color3.fromRGB(220, 205, 175),
+		timber = Color3.fromRGB(95, 65, 38),
+		roof = Color3.fromRGB(75, 55, 40),
+		trim = Color3.fromRGB(60, 90, 55),
+		kind = "cottage",
+	},
+}
+
+local function window(m, cf, timber)
+	part("Frame", Vector3.new(4.6, 4.6, 0.45), cf, timber, m, Enum.Material.Wood)
+	local g = part("Glass", Vector3.new(3.9, 3.9, 0.15), cf * CFrame.new(0, 0, -0.2), Color3.fromRGB(170, 210, 230), m, Enum.Material.Glass)
+	g.Transparency = 0.4
+	part("MullionV", Vector3.new(0.15, 3.9, 0.12), cf * CFrame.new(0, 0, -0.28), timber, m, Enum.Material.Wood)
+	part("MullionH", Vector3.new(3.9, 0.15, 0.12), cf * CFrame.new(0, 0, -0.28), timber, m, Enum.Material.Wood)
+	part("Sill", Vector3.new(5.0, 0.3, 0.8), cf * CFrame.new(0, -2.5, -0.2), timber, m, Enum.Material.Wood)
+end
+
+local function furnishCottage(m, origin, styleName)
+	-- living left / front
+	rug(m, origin * CFrame.new(-8, 0.85, -4), Color3.fromRGB(130, 60, 50))
+	fireplace(m, origin * CFrame.new(-8, 0.7, 12))
+	-- sofa (simple but legible)
+	part("SofaBase", Vector3.new(7.5, 1.1, 2.6), origin * CFrame.new(-8, 1.35, -2), Color3.fromRGB(95, 70, 50), m, Enum.Material.Wood)
+	part("SofaCush", Vector3.new(7.2, 0.7, 2.3), origin * CFrame.new(-8, 2.1, -2), Color3.fromRGB(120, 75, 55), m, Enum.Material.Fabric)
+	part("SofaBack", Vector3.new(7.5, 2.0, 0.55), origin * CFrame.new(-8, 2.7, -0.95), Color3.fromRGB(110, 68, 48), m, Enum.Material.Fabric)
+	table4(m, origin * CFrame.new(-8, 0.7, -6.5), 5.5, 2.6)
+	chair(m, origin * CFrame.new(-11, 0.7, -8.5))
+	chair(m, origin * CFrame.new(-5, 0.7, -8.5))
+	shelf(m, origin * CFrame.new(-16, 0.7, 2) * CFrame.Angles(0, math.rad(90), 0))
+	-- dining / kitchen right-front
+	table4(m, origin * CFrame.new(8, 0.7, -6), 7, 3.4)
+	chair(m, origin * CFrame.new(5, 0.7, -8.5))
+	chair(m, origin * CFrame.new(8, 0.7, -8.5))
+	chair(m, origin * CFrame.new(11, 0.7, -8.5))
+	kitchenCounter(m, origin * CFrame.new(10, 0.7, 2))
+	part("Fridge", Vector3.new(2.4, 5.2, 2.2), origin * CFrame.new(15, 3.4, 2), Color3.fromRGB(225, 225, 230), m, Enum.Material.Metal)
+	-- bedroom right-back
+	bed(m, origin * CFrame.new(10, 0.7, 8))
+	dresser(m, origin * CFrame.new(16, 0.7, 3))
+	part("Nightstand", Vector3.new(2.0, 1.8, 1.8), origin * CFrame.new(5.5, 1.6, 3.5), Color3.fromRGB(100, 70, 40), m, Enum.Material.Wood)
+	local lamp = part("BedLamp", Vector3.new(0.55, 0.7, 0.55), origin * CFrame.new(5.5, 3.0, 3.5), Color3.fromRGB(255, 220, 150), m, Enum.Material.Neon)
 	lamp.CanCollide = false
-	lightOn(lamp, Vector3.zero, Color3.fromRGB(255, 210, 150), 12, 1.1)
-	part("Wardrobe", Vector3.new(6, 10, 2.4), origin * CFrame.new(18, 5.8, 12), Color3.fromRGB(55, 42, 30), m, Enum.Material.Wood)
-	part("WardrobeDoorL", Vector3.new(2.7, 8.5, 0.2), origin * CFrame.new(16.6, 5.5, 10.7), Color3.fromRGB(70, 52, 36), m, Enum.Material.Wood)
-	part("WardrobeDoorR", Vector3.new(2.7, 8.5, 0.2), origin * CFrame.new(19.4, 5.5, 10.7), Color3.fromRGB(70, 52, 36), m, Enum.Material.Wood)
-	part("RugBed", Vector3.new(10, 0.12, 6), origin * CFrame.new(12, 0.85, 14), Color3.fromRGB(50, 70, 100), m, Enum.Material.Fabric)
-	part("Desk", Vector3.new(5, 2.2, 2.2), origin * CFrame.new(6, 1.9, 14), Color3.fromRGB(80, 58, 38), m, Enum.Material.Wood)
-	part("DeskTop", Vector3.new(5.2, 0.25, 2.4), origin * CFrame.new(6, 3.1, 14), Color3.fromRGB(120, 90, 55), m, Enum.Material.Wood)
-	part("DeskChair", Vector3.new(1.8, 0.35, 1.8), origin * CFrame.new(6, 1.5, 12), Color3.fromRGB(40, 45, 55), m, Enum.Material.Fabric)
+	lightOn(lamp, Vector3.zero, Color3.fromRGB(255, 200, 130), 10, 0.9)
+	rug(m, origin * CFrame.new(10, 0.85, 12), Color3.fromRGB(60, 90, 70))
+	-- ceiling beam lamp
+	local ceil = part("CeilLamp", Vector3.new(1.6, 0.5, 1.6), origin * CFrame.new(-6, 11.5, -3), Color3.fromRGB(255, 210, 140), m, Enum.Material.Neon)
+	ceil.CanCollide = false
+	lightOn(ceil, Vector3.zero, Color3.fromRGB(255, 200, 130), 22, 1.5)
 end
 
-local function house(parent, name, origin, wall, roof)
+local function house(parent, name, origin, styleName)
+	styleName = styleName or "miller"
+	local st = STYLES[styleName] or STYLES.miller
 	local m = Instance.new("Model")
 	m.Name = name
 	m.Parent = parent
 
-	local accent = Color3.fromRGB(70, 210, 255)
-	local panel = wall or Color3.fromRGB(210, 200, 185)
-	local trim = roof or Color3.fromRGB(55, 70, 90)
-	local wood = Color3.fromRGB(110, 78, 48)
+	local wall, timber, roofC, trim = st.wall, st.timber, st.roof, st.trim
+	local kind = st.kind
 
-	-- Raised platform so the whole footprint sits above terrain
-	local pad = part("LotPad", Vector3.new(58, 2.2, 48), origin * CFrame.new(0, 0.2, 0), Color3.fromRGB(70, 75, 82), m, Enum.Material.Concrete)
-	m.PrimaryPart = pad
-	part("LotEdge", Vector3.new(58.4, 0.35, 48.4), origin * CFrame.new(0, 1.35, 0), accent, m, Enum.Material.Neon).CanCollide = false
+	-- stone / wood foundation lot
+	local lot = part("Lot", Vector3.new(52, 2.0, 42), origin * CFrame.new(0, 0.15, 0), Color3.fromRGB(115, 110, 100), m, Enum.Material.Limestone)
+	m.PrimaryPart = lot
+	local floorY = 1.8
+	part("Floor", Vector3.new(40, 0.9, 32), origin * CFrame.new(0, floorY, 0), Color3.fromRGB(145, 110, 70), m, Enum.Material.WoodPlanks)
 
-	local floorY = 2.0
-	local floor = part("Floor", Vector3.new(46, 1.0, 36), origin * CFrame.new(0, floorY, 0), Color3.fromRGB(150, 120, 85), m, Enum.Material.WoodPlanks)
-	-- exterior walls (house-like plaster + trim)
-	local wh = 14
-	part("WallB", Vector3.new(46, wh, 1.2), origin * CFrame.new(0, floorY + wh / 2, 17.5), panel, m, Enum.Material.SmoothPlastic)
-	part("WallL", Vector3.new(1.2, wh, 36), origin * CFrame.new(-22.5, floorY + wh / 2, 0), panel, m, Enum.Material.SmoothPlastic)
-	part("WallR", Vector3.new(1.2, wh, 36), origin * CFrame.new(22.5, floorY + wh / 2, 0), panel, m, Enum.Material.SmoothPlastic)
-	part("WallF", Vector3.new(15, wh, 1.2), origin * CFrame.new(-14.5, floorY + wh / 2, -17.5), panel, m, Enum.Material.SmoothPlastic)
-	part("WallF2", Vector3.new(15, wh, 1.2), origin * CFrame.new(14.5, floorY + wh / 2, -17.5), panel, m, Enum.Material.SmoothPlastic)
-	-- pitched roof (reads as a real house)
-	wedge("RoofL", Vector3.new(24, 7, 42), origin * CFrame.new(-11.5, floorY + wh + 2.5, 0) * CFrame.Angles(0, 0, 0.12), trim, m, Enum.Material.Slate)
-	wedge("RoofR", Vector3.new(24, 7, 42), origin * CFrame.new(11.5, floorY + wh + 2.5, 0) * CFrame.Angles(0, math.pi, 0.12), trim, m, Enum.Material.Slate)
-	part("Ridge", Vector3.new(2, 1, 40), origin * CFrame.new(0, floorY + wh + 5.5, 0), Color3.fromRGB(40, 45, 55), m, Enum.Material.Metal)
-	part("Chimney", Vector3.new(3.2, 10, 3.2), origin * CFrame.new(14, floorY + wh + 4, 10), Color3.fromRGB(90, 70, 60), m, Enum.Material.Brick)
-
-	-- door frame + opening door
-	part("DoorFrameL", Vector3.new(1.1, 12, 1.3), origin * CFrame.new(-6, floorY + 6.5, -17.5), wood, m, Enum.Material.Wood)
-	part("DoorFrameR", Vector3.new(1.1, 12, 1.3), origin * CFrame.new(6, floorY + 6.5, -17.5), wood, m, Enum.Material.Wood)
-	part("DoorFrameTop", Vector3.new(12, 1.2, 1.3), origin * CFrame.new(0, floorY + 12.5, -17.5), wood, m, Enum.Material.Wood)
-	makeDoor(m, origin * CFrame.new(-5.2, floorY + 6.2, -17.5), Vector3.new(10, 11.5, 0.45), Color3.fromRGB(70, 45, 28))
-
-	-- windows with frames + sills
-	for _, wx in ipairs({ -16, 16 }) do
-		part("WinFrame", Vector3.new(5.2, 5.2, 0.5), origin * CFrame.new(wx, floorY + 8, -17.3), wood, m, Enum.Material.Wood)
-		local g = part("WinGlass", Vector3.new(4.4, 4.4, 0.2), origin * CFrame.new(wx, floorY + 8, -17.6), Color3.fromRGB(160, 210, 235), m, Enum.Material.Glass)
-		g.Transparency = 0.35
-		part("WinSill", Vector3.new(5.4, 0.35, 1.0), origin * CFrame.new(wx, floorY + 5.3, -17.8), wood, m, Enum.Material.Wood)
-	end
-	for _, wz in ipairs({ -8, 8 }) do
-		local g = part("SideWin", Vector3.new(0.2, 4, 3.5), origin * CFrame.new(-23, floorY + 8, wz), Color3.fromRGB(160, 210, 235), m, Enum.Material.Glass)
-		g.Transparency = 0.35
+	local wh = 12
+	local matWall = Enum.Material.SmoothPlastic
+	if kind == "brick" or kind == "stone" then
+		matWall = Enum.Material.Brick
+	elseif kind == "cabin" then
+		matWall = Enum.Material.WoodPlanks
 	end
 
-	-- porch
-	part("Porch", Vector3.new(22, 1.0, 10), origin * CFrame.new(0, floorY - 0.3, -24), Color3.fromRGB(130, 100, 70), m, Enum.Material.WoodPlanks)
-	part("PorchRail", Vector3.new(22, 1.1, 0.3), origin * CFrame.new(0, floorY + 1.2, -28.5), wood, m, Enum.Material.Wood)
-	part("ColL", Vector3.new(1.2, 12, 1.2), origin * CFrame.new(-8, floorY + 6, -28), wood, m, Enum.Material.Wood)
-	part("ColR", Vector3.new(1.2, 12, 1.2), origin * CFrame.new(8, floorY + 6, -28), wood, m, Enum.Material.Wood)
-	part("PorchRoof", Vector3.new(24, 1.0, 12), origin * CFrame.new(0, floorY + 12.5, -24), trim, m, Enum.Material.Slate)
+	-- walls
+	part("WallB", Vector3.new(40, wh, 1.15), origin * CFrame.new(0, floorY + wh / 2, 15.5), wall, m, matWall)
+	part("WallL", Vector3.new(1.15, wh, 32), origin * CFrame.new(-19.5, floorY + wh / 2, 0), wall, m, matWall)
+	part("WallR", Vector3.new(1.15, wh, 32), origin * CFrame.new(19.5, floorY + wh / 2, 0), wall, m, matWall)
+	part("WallF", Vector3.new(13, wh, 1.15), origin * CFrame.new(-12.5, floorY + wh / 2, -15.5), wall, m, matWall)
+	part("WallF2", Vector3.new(13, wh, 1.15), origin * CFrame.new(12.5, floorY + wh / 2, -15.5), wall, m, matWall)
 
-	-- interior divider + second door
-	part("Divider", Vector3.new(1, 12, 20), origin * CFrame.new(2, floorY + 6.5, 4), panel, m, Enum.Material.SmoothPlastic)
-	makeDoor(m, origin * CFrame.new(2, floorY + 5.5, -3) * CFrame.Angles(0, math.rad(90), 0), Vector3.new(6.5, 10, 0.4), Color3.fromRGB(70, 45, 28))
-
-	local io = origin * CFrame.new(0, floorY, 0)
-	furnitureLiving(m, io)
-	furnitureBedroom(m, io)
-
-	-- ceiling light
-	local ceil = part("CeilingLight", Vector3.new(2.8, 0.35, 2.8), origin * CFrame.new(-8, floorY + 12.5, -4), Color3.fromRGB(255, 230, 180), m, Enum.Material.Neon)
-	ceil.CanCollide = false
-	lightOn(ceil, Vector3.zero, Color3.fromRGB(255, 220, 170), 28, 2.0)
-	-- porch sconces
-	for _, sx in ipairs({ -7, 7 }) do
-		part("Sconce", Vector3.new(0.4, 0.8, 0.4), origin * CFrame.new(sx, floorY + 8, -16.8), Color3.fromRGB(60, 60, 70), m, Enum.Material.Metal)
-		local sc = part("SconceGlow", Vector3.new(0.45, 0.45, 0.45), origin * CFrame.new(sx, floorY + 8, -16.3), accent, m, Enum.Material.Neon)
-		sc.CanCollide = false
-		lightOn(sc, Vector3.zero, Color3.fromRGB(140, 220, 255), 12, 1.0)
+	-- timber framing accents for half-timber look
+	if kind == "timber" or kind == "inn" then
+		for _, x in ipairs({ -19.5, 0, 19.5 }) do
+			part("BeamV", Vector3.new(0.55, wh, 0.55), origin * CFrame.new(x, floorY + wh / 2, -15.7), timber, m, Enum.Material.Wood)
+		end
+		part("BeamH", Vector3.new(40, 0.55, 0.55), origin * CFrame.new(0, floorY + wh - 0.4, -15.7), timber, m, Enum.Material.Wood)
+		part("BeamMid", Vector3.new(40, 0.45, 0.45), origin * CFrame.new(0, floorY + wh / 2, -15.7), timber, m, Enum.Material.Wood)
 	end
+
+	-- pitched roof (thatch-ish darker for reed)
+	local roofMat = Enum.Material.Slate
+	if kind == "thatch" then
+		roofMat = Enum.Material.Grass
+	elseif kind == "cabin" then
+		roofMat = Enum.Material.Wood
+	end
+	wedge("RoofL", Vector3.new(21, 6.5, 38), origin * CFrame.new(-10, floorY + wh + 2.2, 0) * CFrame.Angles(0, 0, 0.14), roofC, m, roofMat)
+	wedge("RoofR", Vector3.new(21, 6.5, 38), origin * CFrame.new(10, floorY + wh + 2.2, 0) * CFrame.Angles(0, math.pi, 0.14), roofC, m, roofMat)
+	part("Ridge", Vector3.new(1.6, 0.7, 36), origin * CFrame.new(0, floorY + wh + 5.2, 0), timber, m, Enum.Material.Wood)
+	part("Chimney", Vector3.new(2.8, 9, 2.8), origin * CFrame.new(12, floorY + wh + 3.5, 8), Color3.fromRGB(110, 90, 80), m, Enum.Material.Brick)
+
+	-- door
+	part("DoorFrameL", Vector3.new(1.0, 10.5, 1.2), origin * CFrame.new(-5.5, floorY + 5.8, -15.5), timber, m, Enum.Material.Wood)
+	part("DoorFrameR", Vector3.new(1.0, 10.5, 1.2), origin * CFrame.new(5.5, floorY + 5.8, -15.5), timber, m, Enum.Material.Wood)
+	part("DoorFrameTop", Vector3.new(11, 1.0, 1.2), origin * CFrame.new(0, floorY + 11.2, -15.5), timber, m, Enum.Material.Wood)
+	makeDoor(m, origin * CFrame.new(-4.8, floorY + 5.5, -15.5), Vector3.new(9.2, 10, 0.4), Color3.fromRGB(80, 48, 26))
+
+	-- windows
+	window(m, origin * CFrame.new(-12, floorY + 7, -15.3), timber)
+	window(m, origin * CFrame.new(12, floorY + 7, -15.3), timber)
+	-- side windows
+	local sideG = part("SideGlass", Vector3.new(0.15, 3.5, 3.2), origin * CFrame.new(-20, floorY + 7, -6), Color3.fromRGB(170, 210, 230), m, Enum.Material.Glass)
+	sideG.Transparency = 0.4
+
+	-- shutters for willow/reed
+	if kind == "cabin" or kind == "thatch" then
+		part("ShutL1", Vector3.new(1.0, 4.2, 0.2), origin * CFrame.new(-14.5, floorY + 7, -15.7), trim, m, Enum.Material.Wood)
+		part("ShutL2", Vector3.new(1.0, 4.2, 0.2), origin * CFrame.new(-9.5, floorY + 7, -15.7), trim, m, Enum.Material.Wood)
+		part("ShutR1", Vector3.new(1.0, 4.2, 0.2), origin * CFrame.new(9.5, floorY + 7, -15.7), trim, m, Enum.Material.Wood)
+		part("ShutR2", Vector3.new(1.0, 4.2, 0.2), origin * CFrame.new(14.5, floorY + 7, -15.7), trim, m, Enum.Material.Wood)
+	end
+
+	-- porch (inn gets bigger porch)
+	local porchZ = (kind == "inn") and 12 or 9
+	part("Porch", Vector3.new(20, 0.9, porchZ), origin * CFrame.new(0, floorY - 0.2, -15.5 - porchZ / 2), Color3.fromRGB(130, 95, 60), m, Enum.Material.WoodPlanks)
+	part("Rail", Vector3.new(20, 1.0, 0.28), origin * CFrame.new(0, floorY + 1.1, -15.5 - porchZ), timber, m, Enum.Material.Wood)
+	part("ColL", Vector3.new(1.0, 10, 1.0), origin * CFrame.new(-7, floorY + 5, -15.5 - porchZ + 0.8), timber, m, Enum.Material.Wood)
+	part("ColR", Vector3.new(1.0, 10, 1.0), origin * CFrame.new(7, floorY + 5, -15.5 - porchZ + 0.8), timber, m, Enum.Material.Wood)
+	part("PorchRoof", Vector3.new(22, 0.8, porchZ + 1), origin * CFrame.new(0, floorY + 10.5, -15.5 - porchZ / 2), roofC, m, roofMat)
+
+	-- interior divider
+	part("Divider", Vector3.new(0.9, 11, 18), origin * CFrame.new(1, floorY + 6, 3), wall, m, matWall)
+	makeDoor(m, origin * CFrame.new(1, floorY + 5, -3) * CFrame.Angles(0, math.rad(90), 0), Vector3.new(5.8, 9.5, 0.35), Color3.fromRGB(80, 48, 26))
+
+	furnishCottage(m, origin * CFrame.new(0, floorY, 0), styleName)
+
+	-- flower boxes under front windows
+	part("BoxL", Vector3.new(4.5, 0.7, 1.2), origin * CFrame.new(-12, floorY + 4.2, -16.3), Color3.fromRGB(90, 60, 35), m, Enum.Material.Wood)
+	part("FlowL", Vector3.new(4.0, 0.7, 0.9), origin * CFrame.new(-12, floorY + 4.9, -16.3), Color3.fromRGB(220, 80, 100), m, Enum.Material.Grass)
+	part("BoxR", Vector3.new(4.5, 0.7, 1.2), origin * CFrame.new(12, floorY + 4.2, -16.3), Color3.fromRGB(90, 60, 35), m, Enum.Material.Wood)
+	part("FlowR", Vector3.new(4.0, 0.7, 0.9), origin * CFrame.new(12, floorY + 4.9, -16.3), Color3.fromRGB(240, 200, 70), m, Enum.Material.Grass)
 
 	return m
 end
 
 local function buildBase(parent, index, x, z, ignore)
-	local origin, gy, good = at(x, z, ignore, 20, 18)
+	local origin, gy, good = at(x, z, ignore, 18, 16)
 	local m = Instance.new("Model")
 	m.Name = "Base" .. index
 	m.Parent = parent
 
-	local accent = Color3.fromRGB(70, 210, 255)
-	-- yard pad above terrain
-	local yard = part("Yard", Vector3.new(70, 2.0, 60), origin * CFrame.new(0, 0.2, 0), Color3.fromRGB(55, 95, 55), m, Enum.Material.Grass)
+	-- each base gets a slightly different cottage tint
+	local palette = {
+		{ wall = Color3.fromRGB(225, 215, 190), roof = Color3.fromRGB(80, 55, 40), trim = Color3.fromRGB(60, 100, 60) },
+		{ wall = Color3.fromRGB(160, 105, 75), roof = Color3.fromRGB(70, 75, 70), trim = Color3.fromRGB(90, 50, 35) },
+		{ wall = Color3.fromRGB(200, 185, 155), roof = Color3.fromRGB(100, 50, 40), trim = Color3.fromRGB(50, 70, 90) },
+		{ wall = Color3.fromRGB(175, 120, 90), roof = Color3.fromRGB(60, 55, 50), trim = Color3.fromRGB(120, 80, 40) },
+	}
+	local pal = palette[((index - 1) % #palette) + 1]
+
+	local yard = part("Yard", Vector3.new(64, 1.8, 54), origin * CFrame.new(0, 0.2, 0), Color3.fromRGB(70, 115, 60), m, Enum.Material.Grass)
 	m.PrimaryPart = yard
-	part("Path", Vector3.new(8, 0.4, 28), origin * CFrame.new(0, 1.3, -14), Color3.fromRGB(90, 90, 95), m, Enum.Material.Concrete)
-	part("FenceL", Vector3.new(0.5, 3.2, 58), origin * CFrame.new(-34, 2.4, 0), Color3.fromRGB(80, 60, 40), m, Enum.Material.Wood)
-	part("FenceR", Vector3.new(0.5, 3.2, 58), origin * CFrame.new(34, 2.4, 0), Color3.fromRGB(80, 60, 40), m, Enum.Material.Wood)
-	part("FenceB", Vector3.new(70, 3.2, 0.5), origin * CFrame.new(0, 2.4, 29), Color3.fromRGB(80, 60, 40), m, Enum.Material.Wood)
+	part("Path", Vector3.new(7, 0.35, 24), origin * CFrame.new(0, 1.2, -12), Color3.fromRGB(120, 110, 95), m, Enum.Material.Cobblestone)
+	part("FenceL", Vector3.new(0.4, 2.8, 52), origin * CFrame.new(-31, 2.0, 0), Color3.fromRGB(90, 65, 40), m, Enum.Material.Wood)
+	part("FenceR", Vector3.new(0.4, 2.8, 52), origin * CFrame.new(31, 2.0, 0), Color3.fromRGB(90, 65, 40), m, Enum.Material.Wood)
+	part("FenceB", Vector3.new(64, 2.8, 0.4), origin * CFrame.new(0, 2.0, 26), Color3.fromRGB(90, 65, 40), m, Enum.Material.Wood)
 
-	-- smaller player house on the lot
-	local ho = origin * CFrame.new(0, 1.2, 6)
-	local panel = Color3.fromRGB(205, 195, 180)
-	local trim = Color3.fromRGB(60, 75, 95)
-	part("HouseFloor", Vector3.new(34, 1.0, 28), ho * CFrame.new(0, 1.8, 0), Color3.fromRGB(145, 115, 80), m, Enum.Material.WoodPlanks)
-	part("HouseFound", Vector3.new(36, 1.8, 30), ho * CFrame.new(0, 0.5, 0), Color3.fromRGB(75, 78, 85), m, Enum.Material.Concrete)
-	part("HWB", Vector3.new(34, 12, 1.1), ho * CFrame.new(0, 8, 13.5), panel, m, Enum.Material.SmoothPlastic)
-	part("HWL", Vector3.new(1.1, 12, 28), ho * CFrame.new(-16.5, 8, 0), panel, m, Enum.Material.SmoothPlastic)
-	part("HWR", Vector3.new(1.1, 12, 28), ho * CFrame.new(16.5, 8, 0), panel, m, Enum.Material.SmoothPlastic)
-	part("HWF", Vector3.new(11, 12, 1.1), ho * CFrame.new(-10.5, 8, -13.5), panel, m, Enum.Material.SmoothPlastic)
-	part("HWF2", Vector3.new(11, 12, 1.1), ho * CFrame.new(10.5, 8, -13.5), panel, m, Enum.Material.SmoothPlastic)
-	wedge("HRL", Vector3.new(18, 5.5, 32), ho * CFrame.new(-8.5, 15.5, 0) * CFrame.Angles(0, 0, 0.12), trim, m, Enum.Material.Slate)
-	wedge("HRR", Vector3.new(18, 5.5, 32), ho * CFrame.new(8.5, 15.5, 0) * CFrame.Angles(0, math.pi, 0.12), trim, m, Enum.Material.Slate)
-	makeDoor(m, ho * CFrame.new(-4.5, 7, -13.5), Vector3.new(8.5, 10.5, 0.45), Color3.fromRGB(70, 45, 28))
-	for _, wx in ipairs({ -10, 10 }) do
-		local g = part("HWin", Vector3.new(3.5, 3.8, 0.2), ho * CFrame.new(wx, 8, -13.8), Color3.fromRGB(160, 210, 235), m, Enum.Material.Glass)
-		g.Transparency = 0.35
-	end
+	-- plant a full country cottage as the base house
+	local styleCopy = {
+		wall = pal.wall,
+		timber = Color3.fromRGB(90, 60, 35),
+		roof = pal.roof,
+		trim = pal.trim,
+		kind = (index % 2 == 0) and "cabin" or "timber",
+	}
+	STYLES["base" .. index] = styleCopy
+	house(m, "Home", origin * CFrame.new(0, 0.8, 4), "base" .. index)
 
-	-- interior basics
-	part("Sofa", Vector3.new(6.5, 1.2, 2.4), ho * CFrame.new(-7, 3.2, -4), Color3.fromRGB(50, 75, 100), m, Enum.Material.Fabric)
-	part("SofaBack", Vector3.new(6.5, 2, 0.6), ho * CFrame.new(-7, 4.2, -3), Color3.fromRGB(45, 65, 90), m, Enum.Material.Fabric)
-	part("Table", Vector3.new(5, 0.3, 2.5), ho * CFrame.new(-7, 3.3, -7), Color3.fromRGB(100, 72, 45), m, Enum.Material.Wood)
-	part("Bed", Vector3.new(6.5, 1.0, 9), ho * CFrame.new(8, 3.1, 4), Color3.fromRGB(220, 220, 230), m, Enum.Material.Fabric)
-	part("BedFrame", Vector3.new(7, 0.8, 9.5), ho * CFrame.new(8, 2.4, 4), Color3.fromRGB(60, 42, 28), m, Enum.Material.Wood)
-	part("Pillow", Vector3.new(5.5, 0.5, 1.8), ho * CFrame.new(8, 3.7, 0.8), Color3.fromRGB(245, 245, 250), m, Enum.Material.Fabric)
-	part("Counter", Vector3.new(7, 2, 2), ho * CFrame.new(8, 3.5, -6), Color3.fromRGB(60, 65, 75), m, Enum.Material.SmoothPlastic)
-	part("Fridge", Vector3.new(2.2, 4.5, 2), ho * CFrame.new(12, 4.5, -6), Color3.fromRGB(220, 225, 230), m, Enum.Material.Metal)
-	local hLamp = part("Lamp", Vector3.new(1.8, 0.3, 1.8), ho * CFrame.new(-5, 12.5, -4), Color3.fromRGB(255, 225, 170), m, Enum.Material.Neon)
-	hLamp.CanCollide = false
-	lightOn(hLamp, Vector3.zero, Color3.fromRGB(255, 220, 160), 20, 1.6)
-
-	-- kiosk
-	part("KioskDesk", Vector3.new(12, 1.2, 4.5), origin * CFrame.new(0, 2.2, -16), Color3.fromRGB(50, 58, 70), m, Enum.Material.Metal)
-	part("KioskCanopy", Vector3.new(14, 0.4, 9), origin * CFrame.new(0, 7.5, -16), Color3.fromRGB(40, 50, 65), m, Enum.Material.Metal)
-	local bank = part("BankPad", Vector3.new(5, 1, 3.5), origin * CFrame.new(0, 3.1, -16), Color3.fromRGB(60, 180, 220), m, Enum.Material.Metal)
-	sign(bank, "BASE " .. index .. " · Q bank / R steal", Vector3.new(0, 5, 0), accent)
-	prompt(bank, "BankPrompt", "Your base kiosk", "Bank meal", Enum.KeyCode.Q, 14)
+	-- market stall out front
+	part("StallDesk", Vector3.new(11, 1.2, 4), origin * CFrame.new(0, 2.0, -16), Color3.fromRGB(120, 85, 50), m, Enum.Material.Wood)
+	part("StallCloth", Vector3.new(12, 0.25, 8), origin * CFrame.new(0, 7.2, -16), pal.trim, m, Enum.Material.Fabric)
+	part("StallPoleL", Vector3.new(0.4, 7, 0.4), origin * CFrame.new(-5, 4, -18), Color3.fromRGB(80, 55, 30), m, Enum.Material.Wood)
+	part("StallPoleR", Vector3.new(0.4, 7, 0.4), origin * CFrame.new(5, 4, -18), Color3.fromRGB(80, 55, 30), m, Enum.Material.Wood)
+	local bank = part("BankPad", Vector3.new(4.5, 0.9, 3.2), origin * CFrame.new(0, 2.9, -16), Color3.fromRGB(180, 150, 70), m, Enum.Material.Metal)
+	sign(bank, "BASE " .. index .. " · Q bank / R steal", Vector3.new(0, 5, 0), Color3.fromRGB(255, 220, 150))
+	prompt(bank, "BankPrompt", "Your base stall", "Bank meal", Enum.KeyCode.Q, 14)
 	prompt(bank, "StealPrompt", "Rival base", "Steal meal", Enum.KeyCode.R, 14)
 
-	local spawn = part("SpawnPad", Vector3.new(8, 0.5, 8), origin * CFrame.new(0, 1.5, -26), Color3.fromRGB(50, 130, 90), m, Enum.Material.SmoothPlastic)
-	sign(spawn, "SPAWN · BASE " .. index, Vector3.new(0, 4, 0), Color3.fromRGB(160, 255, 200))
-	lantern(m, x - 12, gy, z - 18)
-	lantern(m, x + 12, gy, z - 18)
+	local spawn = part("SpawnPad", Vector3.new(7, 0.45, 7), origin * CFrame.new(0, 1.35, -24), Color3.fromRGB(80, 140, 90), m, Enum.Material.Grass)
+	sign(spawn, "SPAWN · BASE " .. index, Vector3.new(0, 4, 0), Color3.fromRGB(180, 255, 180))
+	lantern(m, x - 10, gy, z - 16)
+	lantern(m, x + 10, gy, z - 16)
 
 	local owner = Instance.new("IntValue")
 	owner.Name = "OwnerUserId"
@@ -638,7 +769,7 @@ local function buildBase(parent, index, x, z, ignore)
 	ownerName.Parent = m
 
 	if not good then
-		print(string.format("[Village] Base %d soft-placed (steep/edge) at (%.0f,%.0f)", index, x, z))
+		print(string.format("[Village] Base %d soft-placed at (%.0f, %.0f)", index, x, z))
 	end
 	return m
 end
@@ -756,8 +887,8 @@ function World.build()
 	local ignore = { root }
 
 	local hub, hubY = at(0, 0, ignore, 20, 16)
-	house(root, "MillerHouse", hub, Color3.fromRGB(48, 58, 75), Color3.fromRGB(22, 26, 34))
-	local millerTag = part("MillerTag", Vector3.new(2, 0.4, 2), hub * CFrame.new(0, 22, -28), Color3.fromRGB(70, 210, 255), root, Enum.Material.Neon)
+	house(root, "MillerHouse", hub, "miller")
+	local millerTag = part("MillerTag", Vector3.new(2, 0.4, 2), hub * CFrame.new(0, 22, -28), Color3.fromRGB(255, 200, 120), root, Enum.Material.Neon)
 	millerTag.CanCollide = false
 	sign(millerTag, "MILLER HOUSE · village core", Vector3.new(0, 2, 0))
 
@@ -789,7 +920,7 @@ function World.build()
 	chapel.Parent = root
 	part("Nave", Vector3.new(26, 18, 36), chapelCF * CFrame.new(0, 10, -8), Color3.fromRGB(50, 58, 75), chapel, Enum.Material.SmoothPlastic)
 	part("Tower", Vector3.new(10, 32, 10), chapelCF * CFrame.new(0, 18, -24), Color3.fromRGB(40, 48, 62), chapel, Enum.Material.Metal)
-	part("TowerGlow", Vector3.new(8, 0.5, 8), chapelCF * CFrame.new(0, 34, -24), Color3.fromRGB(70, 210, 255), chapel, Enum.Material.Neon).CanCollide = false
+	part("TowerGlow", Vector3.new(8, 0.5, 8), chapelCF * CFrame.new(0, 34, -24), Color3.fromRGB(255, 200, 120), chapel, Enum.Material.Neon).CanCollide = false
 	local bell = part("LastBell", Vector3.new(4, 4, 4), chapelCF * CFrame.new(0, 28, -24), Color3.fromRGB(200, 220, 255), chapel, Enum.Material.Metal)
 	lightOn(bell, Vector3.new(0, 2, 0), Color3.fromRGB(160, 220, 255), 28, 2)
 	makeDoor(chapel, chapelCF * CFrame.new(-5, 7, 10), Vector3.new(10, 13, 0.5), Color3.fromRGB(25, 90, 130))
@@ -799,26 +930,26 @@ function World.build()
 
 	-- Willow / Ash / Inn / Reed / Smith — spaced so labels don't pile on Miller porch
 	local willowCF = select(1, at(-150, 120, ignore, 14, 12))
-	house(root, "WillowHome", willowCF, Color3.fromRGB(45, 70, 65), Color3.fromRGB(22, 30, 28))
+	house(root, "WillowHome", willowCF, "willow")
 	local herbs = select(1, makeHerbBed(root, willowCF * CFrame.new(0, 0, -22), "WILLOW · E gather herbs"))
 
 	local ashCF = select(1, at(155, 115, ignore, 14, 12))
-	house(root, "AshCottage", ashCF, Color3.fromRGB(70, 55, 50), Color3.fromRGB(30, 24, 22))
+	house(root, "AshCottage", ashCF, "ash")
 	local wood = select(1, makeWoodPile(root, ashCF * CFrame.new(0, 0, -22), "ASH · E chop wood"))
 
 	local innCF = select(1, at(20, 170, ignore, 14, 12))
-	local inn = house(root, "LastBellInn", innCF, Color3.fromRGB(55, 50, 70), Color3.fromRGB(24, 22, 32))
-	local kitchen = part("Kitchen", Vector3.new(8, 2.2, 8), innCF * CFrame.new(12, 2, 18), Color3.fromRGB(50, 60, 80), inn, Enum.Material.Metal)
-	part("Stove", Vector3.new(4, 2.5, 3), innCF * CFrame.new(12, 2.4, 20), Color3.fromRGB(30, 35, 45), inn, Enum.Material.Metal)
+	local inn = house(root, "LastBellInn", innCF, "inn")
+	local kitchen = part("Kitchen", Vector3.new(8, 2.2, 8), innCF * CFrame.new(12, 2.4, 18), Color3.fromRGB(120, 85, 50), inn, Enum.Material.Wood)
+	part("Stove", Vector3.new(4, 2.5, 3), innCF * CFrame.new(12, 2.8, 20), Color3.fromRGB(55, 50, 48), inn, Enum.Material.Metal)
 	sign(kitchen, "INN · F cook meal", Vector3.new(0, 5, 0), Color3.fromRGB(255, 190, 140))
 	prompt(kitchen, "CookPrompt", "Inn kitchen", "Cook meal", Enum.KeyCode.F, 15)
 
 	local reedCF = select(1, at(-145, -130, ignore, 14, 12))
-	house(root, "ReedHouse", reedCF, Color3.fromRGB(50, 65, 55), Color3.fromRGB(22, 28, 24))
+	house(root, "ReedHouse", reedCF, "reed")
 	local reedHerbs = select(1, makeHerbBed(root, reedCF * CFrame.new(10, 0, -20), "REED · E extra herbs"))
 
 	local smithCF = select(1, at(150, -125, ignore, 14, 12))
-	house(root, "MillbrookSmithy", smithCF, Color3.fromRGB(60, 55, 50), Color3.fromRGB(28, 26, 24))
+	house(root, "MillbrookSmithy", smithCF, "smith")
 	local coals = part("Coals", Vector3.new(4.5, 0.7, 3), smithCF * CFrame.new(-8, 2.2, -20), Color3.fromRGB(80, 200, 255), root, Enum.Material.Neon)
 	coals.CanCollide = false
 	lightOn(coals, Vector3.new(0, 1, 0), Color3.fromRGB(100, 210, 255), 20, 1.8)
@@ -837,7 +968,7 @@ function World.build()
 	watcher(root, 90, -210, ignore)
 	watcher(root, 0, 220, ignore)
 
-	print(string.format("[Village] VILLAGE-15 futuristic on Test 1 ground (hubY=%.1f)", hubY))
+	print(string.format("[Village] VILLAGE-16 country village on Test 1 ground (hubY=%.1f)", hubY))
 	return root
 end
 

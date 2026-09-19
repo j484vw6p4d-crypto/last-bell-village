@@ -1,6 +1,6 @@
 --!nocheck
 -- Keeps Test 1 map. Never Terrain:Clear / Workspace wipe.
-print("[Village] VILLAGE-15 keep Test 1 terrain")
+print("[Village] VILLAGE-16 keep Test 1 terrain")
 local ok, World = pcall(function()
 	return require(script.Parent:WaitForChild("World"))
 end)
