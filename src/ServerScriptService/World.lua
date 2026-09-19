@@ -1,5 +1,5 @@
 --!nocheck
--- VILLAGE-18: one enterable country shed with porch. No harvest/steal/bases.
+-- VILLAGE-19: one enterable country shed with porch. No harvest/steal/bases.
 local World = {}
 
 local function part(name, size, cf, color, parent, mat, collide)
@@ -169,6 +169,46 @@ local function layGrass(parent, ignore)
 	print("[Village] grass laid over former junkyard")
 end
 
+-- Water ring around the whole playable terrain (never Terrain:Clear).
+local function layWater(ignore)
+	local Terrain = workspace.Terrain
+	local landY = groundY(0, 0, ignore)
+	local waterSurface = landY - 6
+	local depth = 28
+	local inner = 180 -- keep island dry inside this radius
+	local outer = 420 -- water extends out to here
+	local step = 24
+	local filled = 0
+	for x = -outer, outer, step do
+		for z = -outer, outer, step do
+			local dist = math.sqrt(x * x + z * z)
+			if dist >= inner and dist <= outer then
+				-- water column sitting under the surface
+				local cf = CFrame.new(x, waterSurface - depth * 0.5, z)
+				local ok = pcall(function()
+					Terrain:FillBlock(cf, Vector3.new(step + 2, depth, step + 2), Enum.Material.Water)
+				end)
+				if ok then
+					filled += 1
+				end
+			end
+		end
+	end
+	-- thicken corners so the ring doesn't look patchy
+	for angle = 0, math.pi * 2, math.pi / 16 do
+		for dist = inner + 10, outer, step do
+			local x = math.cos(angle) * dist
+			local z = math.sin(angle) * dist
+			local cf = CFrame.new(x, waterSurface - depth * 0.5, z)
+			pcall(function()
+				Terrain:FillBlock(cf, Vector3.new(step + 4, depth, step + 4), Enum.Material.Water)
+			end)
+		end
+	end
+	print(string.format("[Village] water ring laid (surface=%.1f, blocks~%d)", waterSurface, filled))
+end
+
+
 
 local function warmLighting()
 	local Lighting = game:GetService("Lighting")
@@ -276,6 +316,7 @@ function World.build()
 
 	-- replace grey middle yard with grass
 	layGrass(root, ignore)
+	layWater(ignore)
 
 	-- place shed near spawn on solid ground
 	local x, z = 0, 0
@@ -300,7 +341,7 @@ function World.build()
 	sl.Material = Enum.Material.Grass
 	sl.Parent = root
 
-	print(string.format("[Village] VILLAGE-18 one shed (y=%.1f) — explore only", y))
+	print(string.format("[Village] VILLAGE-19 one shed (y=%.1f) — explore only", y))
 	return root
 end
 
