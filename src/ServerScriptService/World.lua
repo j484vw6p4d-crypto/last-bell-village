@@ -1,5 +1,5 @@
 --!nocheck
--- VILLAGE-20: one enterable country shed with porch. No harvest/steal/bases.
+-- VILLAGE-21: one enterable country shed with porch. No harvest/steal/bases.
 local World = {}
 
 local function part(name, size, cf, color, parent, mat, collide)
@@ -131,10 +131,22 @@ local function clearJunk()
 	return destroyed
 end
 
--- Cover the old grey yard with grass (no Terrain:Clear — only FillBlock grass).
+-- Cover the old grey yard with grass (no Terrain:Clear ÔÇö only FillBlock grass).
+
+-- Remove ocean water left by VILLAGE-19/20 (Water -> Air only; keeps land).
+local function stripOceanWater()
+	local Terrain = workspace.Terrain
+	local region = Region3.new(Vector3.new(-600, -80, -600), Vector3.new(600, 120, 600))
+	region = region:ExpandToGrid(4)
+	pcall(function()
+		Terrain:ReplaceMaterial(region, 4, Enum.Material.Water, Enum.Material.Air)
+	end)
+	print("[Village] stripped leftover ocean water")
+end
+
 local function layGrass(parent, ignore)
 	local Terrain = workspace.Terrain
-	-- paint grass voxels over the old middle yard (FillBlock only — never Terrain:Clear)
+	-- paint grass voxels over the old middle yard (FillBlock only ÔÇö never Terrain:Clear)
 	for x = -80, 80, 16 do
 		for z = -80, 80, 16 do
 			if (x * x + z * z) <= 80 * 80 then
@@ -169,49 +181,6 @@ local function layGrass(parent, ignore)
 	print("[Village] grass laid over former junkyard")
 end
 
--- Ocean ONLY outside the land. Strip any water that spilled onto the island.
-local function layWater(ignore)
-	local Terrain = workspace.Terrain
-	local landY = groundY(0, 0, ignore)
-	local waterSurface = landY - 8
-	local depth = 36
-
-	-- 1) Undo previous water on/near the map (Water -> Air only; keeps grass/hills)
-	local clearSize = 900
-	local region = Region3.new(
-		Vector3.new(-clearSize, waterSurface - 50, -clearSize),
-		Vector3.new(clearSize, waterSurface + 30, clearSize)
-	)
-	region = region:ExpandToGrid(4)
-	pcall(function()
-		Terrain:ReplaceMaterial(region, 4, Enum.Material.Water, Enum.Material.Air)
-	end)
-	print("[Village] cleared water off the island")
-
-	-- 2) Ocean ring well OUTSIDE the playable terrain (island look)
-	local shore = 320 -- start of water (land stays dry inside this)
-	local outer = 520 -- ocean extends out to here
-	local step = 28
-	local filled = 0
-	for x = -outer, outer, step do
-		for z = -outer, outer, step do
-			local dist = math.sqrt(x * x + z * z)
-			if dist >= shore and dist <= outer then
-				local cf = CFrame.new(x, waterSurface - depth * 0.5, z)
-				local ok = pcall(function()
-					Terrain:FillBlock(cf, Vector3.new(step + 4, depth, step + 4), Enum.Material.Water)
-				end)
-				if ok then
-					filled += 1
-				end
-			end
-		end
-	end
-	print(string.format("[Village] island ocean laid (shore=%.0f, blocks~%d)", shore, filled))
-end
-
-
-
 
 local function warmLighting()
 	local Lighting = game:GetService("Lighting")
@@ -241,7 +210,7 @@ local function buildShed(parent, origin)
 	m.PrimaryPart = floor
 	part("Foundation", Vector3.new(29, 1.5, 23), origin * CFrame.new(0, 0.3, 0), Color3.fromRGB(110, 105, 95), m, Enum.Material.Concrete)
 
-	-- walls (front has a WIDE open doorway — walk straight in)
+	-- walls (front has a WIDE open doorway ÔÇö walk straight in)
 	local h = 11
 	part("WallBack", Vector3.new(28, h, 1), origin * CFrame.new(0, 1.2 + h / 2, 10.5), wall, m, Enum.Material.WoodPlanks)
 	part("WallLeft", Vector3.new(1, h, 22), origin * CFrame.new(-13.5, 1.2 + h / 2, 0), wall, m, Enum.Material.WoodPlanks)
@@ -299,7 +268,7 @@ local function buildShed(parent, origin)
 	lamp.CanCollide = false
 	lightOn(lamp, Vector3.zero, Color3.fromRGB(255, 190, 110), 20, 1.5)
 
-	sign(floor, "YOUR SHED · walk in", Vector3.new(0, 8, -12))
+	sign(floor, "YOUR SHED ┬À walk in", Vector3.new(0, 8, -12))
 	return m
 end
 
@@ -310,6 +279,7 @@ function World.build()
 	end
 
 	clearJunk()
+	stripOceanWater()
 	warmLighting()
 
 	local root = Instance.new("Folder")
@@ -319,7 +289,6 @@ function World.build()
 
 	-- replace grey middle yard with grass
 	layGrass(root, ignore)
-	layWater(ignore)
 
 	-- place shed near spawn on solid ground
 	local x, z = 0, 0
@@ -344,7 +313,7 @@ function World.build()
 	sl.Material = Enum.Material.Grass
 	sl.Parent = root
 
-	print(string.format("[Village] VILLAGE-20 one shed (y=%.1f) — explore only", y))
+	print(string.format("[Village] VILLAGE-21 one shed (y=%.1f) ÔÇö explore only", y))
 	return root
 end
 
