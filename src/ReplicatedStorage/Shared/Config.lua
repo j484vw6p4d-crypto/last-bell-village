@@ -1,6 +1,6 @@
 --!nocheck
 return {
-	BuildId = "VILLAGE-10",
+	BuildId = "VILLAGE-11",
 	DaySeconds = 75,
 	NightSeconds = 45,
 	StealRange = 22,
