@@ -614,7 +614,7 @@ task.defer(function()
 	end
 	check(root ~= nil, "VillageBuild exists")
 	check(root and root:FindFirstChild("Bases") ~= nil, "Bases folder")
-	check(Config.BuildId == \"VILLAGE-22b\", "BuildId VILLAGE-22")
+	check(Config.BuildId == "VILLAGE-22b", "BuildId VILLAGE-22b")
 	check(type(World.rebuildBase) == "function", "World.rebuildBase export")
 	local herb = root and root:FindFirstChild("HerbBed", true)
 	local wood = root and root:FindFirstChild("WoodPile", true)
