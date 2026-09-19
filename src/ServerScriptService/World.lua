@@ -1,5 +1,5 @@
 --!nocheck
--- VILLAGE-19: one enterable country shed with porch. No harvest/steal/bases.
+-- VILLAGE-20: one enterable country shed with porch. No harvest/steal/bases.
 local World = {}
 
 local function part(name, size, cf, color, parent, mat, collide)
@@ -169,24 +169,37 @@ local function layGrass(parent, ignore)
 	print("[Village] grass laid over former junkyard")
 end
 
--- Water ring around the whole playable terrain (never Terrain:Clear).
+-- Ocean ONLY outside the land. Strip any water that spilled onto the island.
 local function layWater(ignore)
 	local Terrain = workspace.Terrain
 	local landY = groundY(0, 0, ignore)
-	local waterSurface = landY - 6
-	local depth = 28
-	local inner = 180 -- keep island dry inside this radius
-	local outer = 420 -- water extends out to here
-	local step = 24
+	local waterSurface = landY - 8
+	local depth = 36
+
+	-- 1) Undo previous water on/near the map (Water -> Air only; keeps grass/hills)
+	local clearSize = 900
+	local region = Region3.new(
+		Vector3.new(-clearSize, waterSurface - 50, -clearSize),
+		Vector3.new(clearSize, waterSurface + 30, clearSize)
+	)
+	region = region:ExpandToGrid(4)
+	pcall(function()
+		Terrain:ReplaceMaterial(region, 4, Enum.Material.Water, Enum.Material.Air)
+	end)
+	print("[Village] cleared water off the island")
+
+	-- 2) Ocean ring well OUTSIDE the playable terrain (island look)
+	local shore = 320 -- start of water (land stays dry inside this)
+	local outer = 520 -- ocean extends out to here
+	local step = 28
 	local filled = 0
 	for x = -outer, outer, step do
 		for z = -outer, outer, step do
 			local dist = math.sqrt(x * x + z * z)
-			if dist >= inner and dist <= outer then
-				-- water column sitting under the surface
+			if dist >= shore and dist <= outer then
 				local cf = CFrame.new(x, waterSurface - depth * 0.5, z)
 				local ok = pcall(function()
-					Terrain:FillBlock(cf, Vector3.new(step + 2, depth, step + 2), Enum.Material.Water)
+					Terrain:FillBlock(cf, Vector3.new(step + 4, depth, step + 4), Enum.Material.Water)
 				end)
 				if ok then
 					filled += 1
@@ -194,19 +207,9 @@ local function layWater(ignore)
 			end
 		end
 	end
-	-- thicken corners so the ring doesn't look patchy
-	for angle = 0, math.pi * 2, math.pi / 16 do
-		for dist = inner + 10, outer, step do
-			local x = math.cos(angle) * dist
-			local z = math.sin(angle) * dist
-			local cf = CFrame.new(x, waterSurface - depth * 0.5, z)
-			pcall(function()
-				Terrain:FillBlock(cf, Vector3.new(step + 4, depth, step + 4), Enum.Material.Water)
-			end)
-		end
-	end
-	print(string.format("[Village] water ring laid (surface=%.1f, blocks~%d)", waterSurface, filled))
+	print(string.format("[Village] island ocean laid (shore=%.0f, blocks~%d)", shore, filled))
 end
+
 
 
 
@@ -341,7 +344,7 @@ function World.build()
 	sl.Material = Enum.Material.Grass
 	sl.Parent = root
 
-	print(string.format("[Village] VILLAGE-19 one shed (y=%.1f) — explore only", y))
+	print(string.format("[Village] VILLAGE-20 one shed (y=%.1f) — explore only", y))
 	return root
 end
 
