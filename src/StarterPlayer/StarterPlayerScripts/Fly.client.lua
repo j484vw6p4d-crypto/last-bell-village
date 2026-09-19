@@ -96,7 +96,7 @@ local function setFlying(on)
 	flying = on
 	if flying then
 		startFly()
-		print("[Village] Fly ON — F to stop. WASD move, Space up, Ctrl down.")
+		print("[Village] Fly ON - F to stop. WASD move, Space up, Ctrl down.")
 	else
 		cleanup()
 		print("[Village] Fly OFF")
