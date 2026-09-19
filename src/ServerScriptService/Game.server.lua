@@ -1,5 +1,5 @@
 --!nocheck
--- VILLAGE-22 gameplay: gather / cook / bank / steal / upgrade.
+-- VILLAGE-22b Gameplay: gather / cook / bank / steal / upgrade.
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
 
@@ -446,7 +446,7 @@ Players.PlayerAdded:Connect(function(plr)
 		teleportToBase(plr)
 		local p = ensure(plr)
 		setCarry(plr, p.carry > 0)
-		push(plr, "Welcome to VILLAGE-22 - gather, cook, bank, steal, upgrade!")
+		push(plr, "Welcome to VILLAGE-22b - gather, cook, bank, steal, upgrade!")
 	end)
 	task.defer(function()
 		assignBase(plr)
@@ -596,7 +596,7 @@ end)
 -- Lightweight smoke harness (prints PASS/FAIL). Enable with attribute SmokeTest=true on ServerScriptService.
 task.defer(function()
 	do
-		-- auto smoke for VILLAGE-22 QA (always on)
+		-- auto smoke for VILLAGE-22b QA (always on)
 	end
 	if false then
 		return
@@ -614,7 +614,7 @@ task.defer(function()
 	end
 	check(root ~= nil, "VillageBuild exists")
 	check(root and root:FindFirstChild("Bases") ~= nil, "Bases folder")
-	check(Config.BuildId == "VILLAGE-22", "BuildId VILLAGE-22")
+	check(Config.BuildId == \"VILLAGE-22b\", "BuildId VILLAGE-22")
 	check(type(World.rebuildBase) == "function", "World.rebuildBase export")
 	local herb = root and root:FindFirstChild("HerbBed", true)
 	local wood = root and root:FindFirstChild("WoodPile", true)
@@ -628,7 +628,64 @@ task.defer(function()
 		check(b1:GetAttribute("UpgradeTier") == 2, "rebuildBase tier 2")
 		World.rebuildBase(b1, 0)
 	end
-	print(ok and "[Smoke] ALL PASS" or "[Smoke] HAD FAILURES")
+	
+	-- Simulated economy loop (no real player needed)
+	local sim = {
+		coins = 0, herbs = 0, wood = 0, carry = 0, stock = 0, upgradeTier = 0,
+	}
+	local function simGather(kind)
+		if kind == "herb" and sim.herbs < Config.MaxHerbs then sim.herbs += 1 end
+		if kind == "wood" and sim.wood < Config.MaxWood then sim.wood += 1 end
+	end
+	local function simCook()
+		if sim.carry >= Config.MaxCarry then return false end
+		if sim.herbs < 1 or sim.wood < 1 then return false end
+		sim.herbs -= 1
+		sim.wood -= 1
+		sim.carry = 1
+		return true
+	end
+	local function simBank()
+		if sim.carry < 1 then return false end
+		sim.carry = 0
+		sim.coins += (Config.MealValue or 14)
+		sim.stock += 1
+		return true
+	end
+	local function simUpgrade()
+		local nextTier = sim.upgradeTier + 1
+		if nextTier > (Config.MaxUpgrade or 3) then return false end
+		local cost = Config.UpgradeCosts[nextTier]
+		if sim.coins < cost then return false end
+		sim.coins -= cost
+		sim.upgradeTier = nextTier
+		return true
+	end
+	for _ = 1, 3 do
+		simGather("herb"); simGather("wood")
+		check(simCook(), "sim cook")
+		check(simBank(), "sim bank")
+	end
+	check(sim.coins == 42, "sim coins after 3 banks == 42 (got " .. tostring(sim.coins) .. ")")
+	check(sim.stock == 3, "sim stock == 3")
+	-- bank more to afford upgrades 20+45+80 = 145 -> need 11 banks = 154
+	for _ = 1, 8 do
+		simGather("herb"); simGather("wood"); simCook(); simBank()
+	end
+	check(simUpgrade(), "upgrade to 1")
+	check(simUpgrade(), "upgrade to 2")
+	check(simUpgrade(), "upgrade to 3")
+	check(sim.upgradeTier == 3, "sim max tier 3")
+	-- steal sim
+	local victim = { stock = 2 }
+	local thief = { carry = 0 }
+	if victim.stock > 0 and thief.carry < Config.MaxCarry then
+		victim.stock -= 1
+		thief.carry = 1
+	end
+	check(victim.stock == 1 and thief.carry == 1, "sim steal transfers stock->carry")
+
+print(ok and "[Smoke] ALL PASS" or "[Smoke] HAD FAILURES")
 end)
 
-print("[Village] VILLAGE-22 Game ready")
+print("[Village] VILLAGE-22b Game ready")

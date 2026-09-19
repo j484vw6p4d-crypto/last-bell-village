@@ -119,7 +119,7 @@ local function clearJunk()
 		VillageBuild = true,
 		Village = true,
 		Baseplate = true,
-		SpawnLocation = true,
+		# SpawnLocation left alone (Test 1 spawn)
 		["Smooth Block Model"] = true,
 	}
 	for _, child in ipairs(workspace:GetChildren()) do
